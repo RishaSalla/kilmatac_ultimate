@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Tic-Tac-Toe</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="setup-screen" class="screen">
+        <h2>اعدادات اللعبة</h2>
+        
+        <div class="mode-selection">
+            <h3>اختر نمط اللعب:</h3>
+            <label><input type="radio" name="gameMode" value="PVP"> لاعبون / فرق (Human vs. Human)</label>
+            <label><input type="radio" name="gameMode" value="PVA"> فردي ضد الذكاء الاصطناعي (vs. AI)</label>
+        </div>
+
+        <hr>
+
+        <div id="team-setup" style="display: none;"> 
+            <h3>بيانات الفرق</h3>
+            <fieldset>
+                <legend>الفريق X</legend>
+                <label for="teamXName">اسم الفريق:</label>
+                <input type="text" id="teamXName" placeholder="صقور الجزيرة"><br><br>
+                <label for="playersX">أسماء اللاعبين (افصل بينها بفاصلة ,):</label>
+                <input type="text" id="playersX" placeholder="فهد, عمر, يوسف">
+            </fieldset>
+
+            <fieldset>
+                <legend>الفريق O</legend>
+                <label for="teamOName">اسم الفريق:</label>
+                <input type="text" id="teamOName" placeholder="نمور الرمال"><br><br>
+                <label for="playersO">أسماء اللاعبين (افصل بينها بفاصلة ,):</label>
+                <input type="text" id="playersO" placeholder="علي, خالد, سارة">
+            </fieldset>
+        </div>
+
+        <div id="ai-setup" style="display: none;">
+            <h3>اعدادات الذكاء الاصطناعي</h3>
+            <label for="difficulty">مستوى الصعوبة:</label>
+            <select id="difficulty">
+                <option value="easy">سهل</option>
+                <option value="medium">متوسط</option>
+                <option value="hard">صعب</option>
+            </select><br><br>
+            <label>دورك:</label>
+            <label><input type="radio" name="playerRole" value="X" checked> X</label>
+            <label><input type="radio" name="playerRole" value="O"> O</label>
+        </div>
+
+        <button id="startGameButton" disabled>ابدأ اللعبة</button>
+    </div>
+
+    <div id="game-screen" class="screen hidden">
+        
+        <div id="status-panel">
+            <div id="teamX-status" class="team-status active-turn">
+                <h3>الفريق X: <span id="displayTeamXName"></span></h3>
+                <p>الدور الآن على: <strong id="currentPlayerXName"></strong></p>
+                <p>نقاط اللوحات: <span id="teamXScore">0</span></p>
+            </div>
+            
+            <div id="teamO-status" class="team-status">
+                <h3>الفريق O: <span id="displayTeamOName"></span></h3>
+                <p>الدور الآن على: <strong id="currentPlayerOName"></strong></p>
+                <p>نقاط اللوحات: <span id="teamOScore">0</span></p>
+            </div>
+        </div>
+
+        <div id="meta-board">
+            </div>
+
+        <div id="game-message" class="message"></div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
