@@ -360,9 +360,8 @@ function findMediumMove(aiSymbol) {
     // 3. إذا لم يكن هناك فوز أو منع وشيك، العب عشوائياً
     return findRandomMove();
 }
-
 // =======================================================
-// 6. دالة التعامل مع الحركة الرئيسية (handleMove)
+// 6. دالة التعامل مع الحركة الرئيسية (handleMove) - النسخة المصححة
 // =======================================================
 
 function handleMove(event) {
@@ -373,11 +372,10 @@ function handleMove(event) {
     const cellIndex = parseInt(cellElement.dataset.cell);
 
     // 1. التحقق من صحة الحركة والقواعد
-    if (gameBoard[localBoardIndex][cellIndex] !== null || 
-        (activeLocalBoard !== null && activeLocalBoard !== localBoardIndex)) {
-        return; 
-    }
-    
+    if (gameBoard[localBoardIndex][cellIndex] !== null) return;
+    if (metaBoard[localBoardIndex] !== null) return; // لا يمكن اللعب في لوحة فاز بها أحد بالفعل!
+    if (activeLocalBoard !== null && activeLocalBoard !== localBoardIndex) return;
+
     const currentPlayerSymbol = currentTeam;
     
     // 2. تنفيذ الحركة
@@ -386,26 +384,16 @@ function handleMove(event) {
     cellElement.classList.add(currentPlayerSymbol);
 
     // 3. تطبيق قاعدة Ultimate Tic-Tac-Toe لتحديد اللوحة النشطة التالية
-    let nextLocalBoardIndex = cellIndex; 
+    let nextLocalBoardIndex = cellIndex;
     
-    if (metaBoard[nextLocalBoardIndex] !== null) {
-        // حالة "الإرسال الحر"
-        activeLocalBoard = null; 
-        document.getElementById('game-message').textContent = 'اللوحة المستهدفة ممتلئة! الإرسال حر.';
-    } else {
-        // الإرسال العادي
-        activeLocalBoard = nextLocalBoardIndex;
-        document.getElementById('game-message').textContent = '';
-    }
-
-    // 4. التحقق من الفوز في اللوحة المحلية
+    // 4. التحقق من الفوز في اللوحة المحلية قبل تعيين اللوحة النشطة التالية
     const localWinner = checkLocalWinner(localBoardIndex, currentPlayerSymbol);
     if (localWinner) {
         metaBoard[localBoardIndex] = localWinner;
         markLocalBoardAsWon(localBoardIndex, localWinner);
         updateStatusPanelScores();
         
-        // 5. التحقق من فوز اللوحة الكبرى (نهاية اللعبة)
+        // التحقق من فوز اللوحة الكبرى (نهاية اللعبة)
         const overallWinner = checkOverallWinner(localWinner);
         if (overallWinner) {
             gameActive = false;
@@ -416,6 +404,17 @@ function handleMove(event) {
         }
     }
     
+    // 5. الآن نحدد اللوحة النشطة للدور القادم
+    if (metaBoard[nextLocalBoardIndex] !== null) {
+        // حالة "الإرسال الحر"
+        activeLocalBoard = null; 
+        document.getElementById('game-message').textContent = 'اللوحة المستهدفة ممتلئة! الإرسال حر.';
+    } else {
+        // الإرسال العادي
+        activeLocalBoard = nextLocalBoardIndex;
+        document.getElementById('game-message').textContent = '';
+    }
+
     // 6. تبديل اللاعب والدور (Rotation Logic)
     if (currentTeam === 'X') {
         playerIndexX = (playerIndexX + 1) % teamXPlayers.length;
@@ -430,12 +429,17 @@ function handleMove(event) {
     
     // 8. إذا كان الدور الآن للـ AI، استدعه
     if (gameMode === 'PVA' && (currentTeam === 'X' && teamXName.includes('الذكاء الاصطناعي')) || (currentTeam === 'O' && teamOName.includes('الذكاء الاصطناعي'))) {
-        // منع اللاعب البشري من النقر أثناء دور AI
+        // تعطيل النقر للاعب البشري
         document.querySelectorAll('.cell').forEach(cell => cell.style.pointerEvents = 'none');
         setTimeout(() => {
             makeAIMove();
-            // إعادة السماح للاعب البشري بالنقر بعد انتهاء حركة AI
+            // إعادة السماح للاعب البشري بالنقر
             document.querySelectorAll('.cell').forEach(cell => cell.style.pointerEvents = 'auto');
         }, 800);
+    }
+    
+    // 9. في حالة وضع PVP، تأكد من تمكين النقر
+    if (gameMode === 'PVP') {
+         document.querySelectorAll('.cell').forEach(cell => cell.style.pointerEvents = 'auto');
     }
 }
