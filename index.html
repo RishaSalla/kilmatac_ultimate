@@ -3,21 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultimate Math Tic-Tac-Toe</title>
+    <title>X-O Math Ultimate</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="dark-mode"> <div id="setup-screen" class="screen">
-        <h1 class="glow-text">تيك تاك تو الحسابية</h1>
-        
-        <div class="setup-grid">
-            <div class="setup-section">
-                <h3>إعدادات الفرق</h3>
-                <input type="text" id="teamXName" placeholder="اسم الفريق X (مثلاً: الصقور)">
-                <input type="text" id="teamOName" placeholder="اسم الفريق O (مثلاً: النمور)">
+<body class="dark-mode">
+    <div id="setup-screen" class="screen">
+        <h1 class="glow-text">إكس أو الحسابية</h1>
+        <div class="setup-container">
+            <div class="input-group">
+                <input type="text" id="teamXName" placeholder="اسم الفريق X">
+                <input type="text" id="teamOName" placeholder="اسم الفريق O">
             </div>
-
-            <div class="setup-section">
-                <h3>قواعد التحدي</h3>
+            <div class="input-group">
                 <select id="mathOperation">
                     <option value="random">عمليات عشوائية</option>
                     <option value="add">جمع (+)</option>
@@ -25,56 +22,54 @@
                     <option value="mul">ضرب (×)</option>
                     <option value="div">قسمة (÷)</option>
                 </select>
-
                 <select id="timerOption">
                     <option value="0">بدون مؤقت</option>
-                    <option value="5">5 ثوانٍ (سريع جداً)</option>
-                    <option value="10" selected>10 ثوانٍ (متوسط)</option>
-                    <option value="20">20 ثانية (هادئ)</option>
+                    <option value="5">5 ثوانٍ</option>
+                    <option value="10" selected>10 ثوانٍ</option>
+                    <option value="20">20 ثانية</option>
                 </select>
             </div>
+            <button id="startGameButton" class="main-btn">دخول اللعبة</button>
+            <button id="themeToggle" class="sub-btn">تبديل المظهر (فاتح/داكن)</button>
         </div>
-
-        <button id="startGameButton" class="btn-glow">دخول المعركة</button>
-        <button id="themeToggle" class="btn-secondary">تبديل الوضع (فاتح/داكن)</button>
     </div>
 
     <div id="game-screen" class="screen hidden">
-        <div id="status-panel">
-            <div id="teamX-status" class="team-card x-style">
-                <span class="team-name" id="displayTeamXName"></span>
-                <div class="score">نقاط: <span id="teamXScore">0</span></div>
+        <div class="game-header">
+            <div id="teamX-card" class="team-card x-side">
+                <h2 id="dispX">X</h2>
+                <p>النقاط: <span id="scoreX">0</span></p>
             </div>
-            
-            <div id="timer-display" class="timer-ring">--</div>
-
-            <div id="teamO-status" class="team-card o-style">
-                <span class="team-name" id="displayTeamOName"></span>
-                <div class="score">نقاط: <span id="teamOScore">0</span></div>
+            <div class="timer-center">
+                <div id="main-timer">--</div>
+            </div>
+            <div id="teamO-card" class="team-card o-side">
+                <h2 id="dispO">O</h2>
+                <p>النقاط: <span id="scoreO">0</span></p>
             </div>
         </div>
 
         <div id="meta-board"></div>
-        <div id="free-move-msg" class="free-move-banner hidden">لعب حر للخصم!</div>
+        <div id="free-move-msg" class="banner hidden">⚡ لعب حر للخصم! ⚡</div>
     </div>
 
     <div id="math-popup" class="popup hidden">
-        <div class="popup-content">
-            <div id="popup-timer-bar"></div>
-            <h2 id="math-question">8 × 7</h2>
+        <div class="popup-box">
+            <div id="popup-progress"></div>
+            <h2 id="math-question">...</h2>
             <div id="answer-display">_</div>
             <div class="numpad">
-                <button onclick="appendNum(1)">1</button>
-                <button onclick="appendNum(2)">2</button>
-                <button onclick="appendNum(3)">3</button>
-                <button onclick="appendNum(4)">4</button>
-                <button onclick="appendNum(5)">5</button>
-                <button onclick="appendNum(6)">6</button>
-                <button onclick="appendNum(7)">7</button>
-                <button onclick="appendNum(8)">8</button>
-                <button onclick="appendNum(9)">9</button>
-                <button onclick="clearNum()" class="clear">C</button>
-                <button onclick="appendNum(0)">0</button>
+                <button onclick="pressNum(1)">1</button>
+                <button onclick="pressNum(2)">2</button>
+                <button onclick="pressNum(3)">3</button>
+                <button onclick="pressNum(4)">4</button>
+                <button onclick="pressNum(5)">5</button>
+                <button onclick="pressNum(6)">6</button>
+                <button onclick="pressNum(7)">7</button>
+                <button onclick="pressNum(8)">8</button>
+                <button onclick="pressNum(9)">9</button>
+                <button onclick="clearAns()" class="c-btn">C</button>
+                <button onclick="pressNum(0)">0</button>
             </div>
         </div>
     </div>
