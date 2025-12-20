@@ -8,9 +8,7 @@ let currentTeam = 'X';
 let gameActive = false;
 let mathOp, timeLimit, countdown, targetCell, currentAns;
 let playerAnswer = "";
-
-// نظام منع التكرار: مخزن الأسئلة
-let questionPool = [];
+let questionPool = []; // لمنع التكرار
 
 // القسمة الذهبية (بدون رقم 1)
 const goldDiv = [
@@ -19,64 +17,69 @@ const goldDiv = [
 ];
 
 // =========================================
-// 2. تشغيل الخلفية المتحركة (Matrix Numbers)
+// 2. إدارة الخلفية المتحركة (Matrix - نسخة هادئة)
 // =========================================
-function initMatrixBackground() {
-    const container = document.getElementById('bg-animation-container');
-    const columnCount = Math.floor(window.innerWidth / 20);
-    
-    for (let i = 0; i < columnCount; i++) {
-        const span = document.createElement('span');
-        span.className = 'matrix-column';
-        span.style.left = (i * 20) + 'px';
-        span.style.animationDuration = (Math.random() * 3 + 2) + 's';
-        span.style.animationDelay = (Math.random() * 5) + 's';
-        span.innerText = Math.floor(Math.random() * 9);
-        container.appendChild(span);
+function initMatrixBg() {
+    const bg = document.getElementById('matrix-bg');
+    const cols = Math.floor(window.innerWidth / 30);
+    for (let i = 0; i < cols; i++) {
+        const div = document.createElement('div');
+        div.style.position = 'absolute';
+        div.style.left = (i * 30) + 'px';
+        div.style.top = '-50px';
+        div.style.color = '#475569';
+        div.style.fontSize = '12px';
+        div.style.transition = 'top 5s linear'; // سقوط بطيء جداً
+        div.innerText = Math.floor(Math.random() * 9);
+        bg.appendChild(div);
         
-        // تحديث الأرقام أثناء السقوط
+        // تحريك هادئ
         setInterval(() => {
-            span.innerText = Math.floor(Math.random() * 9);
-        }, 100);
+            let top = parseInt(div.style.top);
+            if (top > window.innerHeight) {
+                div.style.top = '-50px';
+            } else {
+                div.style.top = (top + 2) + 'px';
+            }
+            if (Math.random() > 0.9) div.innerText = Math.floor(Math.random() * 9);
+        }, 50);
     }
 }
 
 // =========================================
-// 3. منطق توليد الأسئلة المطور (تنوع + منع تكرار)
+// 3. منطق توليد الأسئلة (منع التكرار + الضيف الخفيف)
 // =========================================
-function getSmartNum() {
-    // 15% احتمال لظهور الرقم 1 (الضيف الخفيف)
-    return (Math.random() < 0.15) ? 1 : Math.floor(Math.random() * 8) + 2;
-}
-
-function generateUniqueQuestion() {
-    let q;
+function generateQuestion() {
+    let qText, ans;
     let attempts = 0;
     
     do {
-        let a, b, ans, opName;
-        let op = mathOp === 'random' ? ['add', 'sub', 'mul', 'div'][Math.floor(Math.random()*4)] : mathOp;
+        let a, b, op;
+        let type = mathOp === 'random' ? ['add', 'sub', 'mul', 'div'][Math.floor(Math.random()*4)] : mathOp;
         
-        if (op === 'div') {
-            const item = (Math.random() > 0.15) ? goldDiv[Math.floor(Math.random()*goldDiv.length)] : {a:7, b:7, ans:1};
-            a = item.a; b = item.b; ans = item.ans; opName = '÷';
-        } else if (op === 'mul') {
-            a = getSmartNum(); b = getSmartNum(); ans = a * b; opName = '×';
-        } else if (op === 'add') {
-            a = getSmartNum(); b = getSmartNum(); ans = a + b; opName = '+';
+        if (type === 'div') {
+            const item = (Math.random() > 0.15) ? goldDiv[Math.floor(Math.random()*goldDiv.length)] : {a:5, b:5, ans:1};
+            a = item.a; b = item.b; ans = item.ans; op = '÷';
+        } else if (type === 'mul') {
+            a = (Math.random() < 0.15) ? 1 : Math.floor(Math.random()*8)+2;
+            b = (Math.random() < 0.15) ? 1 : Math.floor(Math.random()*8)+2;
+            ans = a * b; op = '×';
+        } else if (type === 'add') {
+            a = Math.floor(Math.random()*8)+1; b = Math.floor(Math.random()*8)+1;
+            ans = a + b; op = '+';
         } else {
-            a = getSmartNum(); b = Math.floor(Math.random() * a) + 1; ans = a - b; opName = '-';
+            a = Math.floor(Math.random()*8)+2; b = Math.floor(Math.random()*(a-1))+1;
+            ans = a - b; op = '-';
         }
-        
-        q = { text: `${a} ${opName} ${b}`, ans: ans };
+        qText = `${a} ${op} ${b}`;
         attempts++;
-    } while (questionPool.includes(q.text) && attempts < 10); // محاولة التغيير إذا كان مكرراً
+    } while (questionPool.includes(qText) && attempts < 15);
 
-    questionPool.push(q.text);
-    if (questionPool.length > 20) questionPool.shift(); // الحفاظ على آخر 20 سؤال فقط لمنع التكرار القريب
+    questionPool.push(qText);
+    if (questionPool.length > 25) questionPool.shift();
     
-    currentAns = q.ans;
-    document.getElementById('math-question-text').textContent = q.text;
+    currentAns = ans;
+    document.getElementById('math-q').textContent = qText;
 }
 
 // =========================================
@@ -89,121 +92,78 @@ function onCellClick(cell) {
 
     targetCell = cell;
     playerAnswer = "";
-    document.getElementById('answer-input-display').textContent = "_";
-    document.getElementById('answer-input-display').classList.remove('feedback-success');
+    document.getElementById('math-ans-display').textContent = "_";
+    document.getElementById('math-ans-display').style.color = "var(--text)";
+    document.getElementById('success-tick').classList.add('hidden');
     document.getElementById('math-popup').classList.remove('hidden');
-    generateUniqueQuestion();
+    generateQuestion();
 
-    if (timeLimit > 0) startPopupTimer();
+    if (timeLimit > 0) startTimer();
 }
 
-function startPopupTimer() {
-    let left = timeLimit;
-    const bar = document.getElementById('math-progress-bar');
-    countdown = setInterval(() => {
-        left -= 0.1;
-        bar.style.width = (left / timeLimit * 100) + "%";
-        if (left <= 0) { clearInterval(countdown); handleFail(); }
-    }, 100);
-}
-
-// إدخال الأرقام (التعامل مع الإجابة الصحيحة)
-function pressNum(n) {
+function pressKey(n) {
     playerAnswer += n;
-    const display = document.getElementById('answer-input-display');
+    const display = document.getElementById('math-ans-display');
     display.textContent = playerAnswer;
 
     if (parseInt(playerAnswer) === currentAns) {
         clearInterval(countdown);
-        display.classList.add('feedback-success'); // تلوين بالأخضر
+        display.style.color = "var(--success)"; // تحويل الرقم للأخضر
+        document.getElementById('success-tick').classList.remove('hidden'); // إظهار رسالة النجاح
         
-        // تأخير بسيط (نصف ثانية) لتثبيت الإجابة قبل الإغلاق
+        // تثبيت الإجابة لمدة ثانية قبل الإغلاق كما اتفقنا
         setTimeout(() => {
             document.getElementById('math-popup').classList.add('hidden');
-            executeMove();
-        }, 600);
+            completeMove();
+        }, 1000);
     } else if (playerAnswer.length >= currentAns.toString().length) {
-        // إجابة خاطئة: مسح تلقائي للمحاولة مرة أخرى
-        setTimeout(() => {
-            playerAnswer = "";
-            display.textContent = "_";
-        }, 300);
+        setTimeout(() => { playerAnswer = ""; display.textContent = "_"; }, 300);
     }
 }
 
-// =========================================
-// 5. تنفيذ الحركة وتأثير الفوز الضخم
-// =========================================
-function executeMove() {
+function completeMove() {
     const bIdx = parseInt(targetCell.parentElement.dataset.board);
     const cIdx = parseInt(targetCell.dataset.cell);
     
     gameBoard[bIdx][cIdx] = currentTeam;
     targetCell.textContent = currentTeam;
     targetCell.classList.add(currentTeam);
-    document.getElementById('free-move-banner').classList.add('hidden');
 
-    checkLocalAndGlobalWin(bIdx, cIdx);
+    checkWinState(bIdx, cIdx);
 }
 
-function checkLocalAndGlobalWin(bIdx, cIdx) {
-    const winCombos = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+function checkWinState(bIdx, cIdx) {
+    const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
     
-    // فحص الفوز المحلي
-    let localWinner = null;
-    for (let combo of winCombos) {
-        if (gameBoard[bIdx][combo[0]] && gameBoard[bIdx][combo[0]] === gameBoard[bIdx][combo[1]] && gameBoard[bIdx][combo[0]] === gameBoard[bIdx][combo[2]]) {
-            localWinner = gameBoard[bIdx][combo[0]];
-            break;
-        }
+    // فحص المربع الصغير
+    let won = wins.some(c => gameBoard[bIdx][c[0]] && gameBoard[bIdx][c[0]] === gameBoard[bIdx][c[1]] && gameBoard[bIdx][c[0]] === gameBoard[bIdx][c[2]]);
+    
+    if (won) {
+        metaBoard[bIdx] = currentTeam;
+        const boardDiv = document.querySelector(`[data-board="${bIdx}"]`);
+        const mark = document.createElement('div');
+        mark.className = 'big-mark';
+        mark.style.color = currentTeam === 'X' ? 'var(--accent-x)' : 'var(--accent-o)';
+        mark.innerText = currentTeam;
+        boardDiv.appendChild(mark);
     }
 
-    if (localWinner) {
-        metaBoard[bIdx] = localWinner;
-        showBigMark(bIdx, localWinner); // تأثير الفوز الضخم
-    }
-
-    // فحص الفوز الكلي
-    let globalWinner = null;
-    for (let combo of winCombos) {
-        if (metaBoard[combo[0]] && metaBoard[combo[0]] === metaBoard[combo[1]] && metaBoard[combo[0]] === metaBoard[combo[2]]) {
-            globalWinner = metaBoard[combo[0]];
-            break;
-        }
-    }
-
-    if (globalWinner) {
+    // فحص اللعبة كاملة
+    if (wins.some(c => metaBoard[c[0]] && metaBoard[c[0]] === metaBoard[c[1]] && metaBoard[c[0]] === metaBoard[c[2]])) {
         gameActive = false;
-        setTimeout(() => alert(`🎉 تهانينا! الفائز بالمعركة هو: ${globalWinner}`), 500);
+        setTimeout(() => alert("🎉 الفائز هو: " + (currentTeam === 'X' ? 'فريق X' : 'فريق O')), 300);
     }
 
-    // تحديد المربع التالي
     activeLocalBoard = metaBoard[cIdx] ? null : cIdx;
     currentTeam = currentTeam === 'X' ? 'O' : 'X';
-    updateGameState();
-}
-
-function showBigMark(bIdx, winner) {
-    const board = document.querySelector(`[data-board="${bIdx}"]`);
-    const mark = document.createElement('div');
-    mark.className = 'big-winner-mark';
-    mark.style.color = winner === 'X' ? 'var(--accent-x)' : 'var(--accent-o)';
-    mark.innerText = winner;
-    board.appendChild(mark);
+    updateUI();
 }
 
 // =========================================
-// 6. دوال مساعدة وتحكم
+// 5. وظائف التحكم والواجهة
 // =========================================
-function handleFail() {
-    document.getElementById('math-popup').classList.add('hidden');
-    activeLocalBoard = null; // لعب حر للخصم
-    currentTeam = currentTeam === 'X' ? 'O' : 'X';
-    document.getElementById('free-move-banner').classList.remove('hidden');
-    updateGameState();
-}
-
-function updateGameState() {
+function updateUI() {
+    document.getElementById('game-timer').textContent = "--";
     document.getElementById('teamX-card').classList.toggle('active-turn', currentTeam === 'X');
     document.getElementById('teamO-card').classList.toggle('active-turn', currentTeam === 'O');
     document.querySelectorAll('.local-board').forEach((b, i) => {
@@ -213,45 +173,53 @@ function updateGameState() {
     document.getElementById('scoreO').textContent = metaBoard.filter(v => v === 'O').length;
 }
 
-// أحداث الأزرار
-document.querySelectorAll('.num-btn[data-val]').forEach(btn => {
-    btn.onclick = () => pressNum(btn.dataset.val);
-});
-document.getElementById('clear-ans').onclick = () => { playerAnswer = ""; document.getElementById('answer-input-display').textContent = "_"; };
-document.getElementById('backspace-ans').onclick = () => { 
-    playerAnswer = playerAnswer.slice(0, -1); 
-    document.getElementById('answer-input-display').textContent = playerAnswer || "_"; 
-};
+function startTimer() {
+    let left = timeLimit;
+    countdown = setInterval(() => {
+        left--;
+        document.getElementById('game-timer').textContent = left;
+        if (left <= 0) {
+            clearInterval(countdown);
+            document.getElementById('math-popup').classList.add('hidden');
+            activeLocalBoard = null;
+            currentTeam = currentTeam === 'X' ? 'O' : 'X';
+            updateUI();
+        }
+    }, 1000);
+}
+
+function toggleInstructions(show) {
+    document.getElementById('instructions-modal').classList.toggle('hidden', !show);
+}
 
 document.getElementById('startGameButton').onclick = () => {
     mathOp = document.getElementById('mathOperation').value;
     timeLimit = parseInt(document.getElementById('timerOption').value);
-    document.getElementById('dispXName').textContent = document.getElementById('teamXName').value || 'فريق X';
-    document.getElementById('dispOName').textContent = document.getElementById('teamOName').value || 'فريق O';
+    document.getElementById('nameX').textContent = document.getElementById('teamXName').value || 'الفريق X';
+    document.getElementById('nameO').textContent = document.getElementById('teamOName').value || 'الفريق O';
     document.getElementById('setup-screen').classList.add('hidden');
     document.getElementById('game-screen').classList.remove('hidden');
-    initGameBoard();
-    gameActive = true;
-    updateGameState();
-};
-
-function initGameBoard() {
+    
+    // بناء اللوحة
     const meta = document.getElementById('meta-board');
     meta.innerHTML = '';
-    for (let i = 0; i < 9; i++) {
-        const lb = document.createElement('div');
-        lb.className = 'local-board';
-        lb.dataset.board = i;
-        for (let j = 0; j < 9; j++) {
-            const c = document.createElement('div');
-            c.className = 'cell';
-            c.dataset.cell = j;
+    for(let i=0; i<9; i++) {
+        let lb = document.createElement('div');
+        lb.className = 'local-board'; lb.dataset.board = i;
+        for(let j=0; j<9; j++) {
+            let c = document.createElement('div');
+            c.className = 'cell'; c.dataset.cell = j;
             c.onclick = (e) => onCellClick(e.target);
             lb.appendChild(c);
         }
         meta.appendChild(lb);
     }
-}
+    gameActive = true;
+    updateUI();
+};
 
-// تشغيل الخلفية عند التحميل
-window.onload = initMatrixBackground;
+// وظائف الكيبورد الإضافية
+function clearKey() { playerAnswer = ""; document.getElementById('math-ans-display').textContent = "_"; }
+function backspaceKey() { playerAnswer = playerAnswer.slice(0,-1); document.getElementById('math-ans-display').textContent = playerAnswer || "_"; }
+
+window.onload = initMatrixBg;
