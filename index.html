@@ -3,81 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultimate Tic-Tac-Toe - تيك تاك تو المطلقة</title>
-    <link rel="stylesheet" href="style.css"> 
+    <title>Ultimate Math Tic-Tac-Toe</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
-
-    <div id="setup-screen" class="screen">
-        <h2>إعدادات لعبة تيك تاك تو المطلقة</h2>
+<body class="dark-mode"> <div id="setup-screen" class="screen">
+        <h1 class="glow-text">تيك تاك تو الحسابية</h1>
         
-        <div class="mode-selection">
-            <h3>اختر نمط اللعب:</h3>
-            <label><input type="radio" name="gameMode" value="PVP"> لاعبون / فرق (Human vs. Human)</label><br>
-            <label><input type="radio" name="gameMode" value="PVA"> فردي ضد الذكاء الاصطناعي (vs. AI)</label>
+        <div class="setup-grid">
+            <div class="setup-section">
+                <h3>إعدادات الفرق</h3>
+                <input type="text" id="teamXName" placeholder="اسم الفريق X (مثلاً: الصقور)">
+                <input type="text" id="teamOName" placeholder="اسم الفريق O (مثلاً: النمور)">
+            </div>
+
+            <div class="setup-section">
+                <h3>قواعد التحدي</h3>
+                <select id="mathOperation">
+                    <option value="random">عمليات عشوائية</option>
+                    <option value="add">جمع (+)</option>
+                    <option value="sub">طرح (-)</option>
+                    <option value="mul">ضرب (×)</option>
+                    <option value="div">قسمة (÷)</option>
+                </select>
+
+                <select id="timerOption">
+                    <option value="0">بدون مؤقت</option>
+                    <option value="5">5 ثوانٍ (سريع جداً)</option>
+                    <option value="10" selected>10 ثوانٍ (متوسط)</option>
+                    <option value="20">20 ثانية (هادئ)</option>
+                </select>
+            </div>
         </div>
 
-        <hr>
-
-        <div id="team-setup" style="display: none;"> 
-            <h3>بيانات الفرق المتناوبة</h3>
-            
-            <fieldset>
-                <legend>الفريق X</legend>
-                <label for="teamXName">اسم الفريق (X):</label>
-                <input type="text" id="teamXName" placeholder="صقور الجزيرة"><br>
-                <label for="playersX">أسماء اللاعبين (افصل بينها بفاصلة ,):</label>
-                <input type="text" id="playersX" placeholder="فهد, عمر, يوسف">
-            </fieldset>
-
-            <fieldset>
-                <legend>الفريق O</legend>
-                <label for="teamOName">اسم الفريق (O):</label>
-                <input type="text" id="teamOName" placeholder="نمور الرمال"><br>
-                <label for="playersO">أسماء اللاعبين (افصل بينها بفاصلة ,):</label>
-                <input type="text" id="playersO" placeholder="علي, خالد, سارة">
-            </fieldset>
-        </div>
-
-        <div id="ai-setup" style="display: none;">
-            <h3>إعدادات الذكاء الاصطناعي</h3>
-            <label for="difficulty">مستوى الصعوبة:</label>
-            <select id="difficulty">
-                <option value="easy">سهل (حركات عشوائية)</option>
-                <option value="medium">متوسط (منع وفوز وشيك)</option>
-                <option value="hard">صعب (استراتيجية متقدمة)</option>
-            </select><br><br>
-            <label>دورك:</label>
-            <label><input type="radio" name="playerRole" value="X" checked> X</label>
-            <label><input type="radio" name="playerRole" value="O"> O</label>
-            <p style="font-size: 0.9em; color: gray;">* يتم استخدام حقل اسم الفريق X لتسمية اللاعب البشري.</p>
-        </div>
-
-        <button id="startGameButton" disabled>ابدأ اللعبة</button>
+        <button id="startGameButton" class="btn-glow">دخول المعركة</button>
+        <button id="themeToggle" class="btn-secondary">تبديل الوضع (فاتح/داكن)</button>
     </div>
 
     <div id="game-screen" class="screen hidden">
-        
         <div id="status-panel">
-            <div id="teamX-status" class="team-status">
-                <h3>الفريق X: <span id="displayTeamXName"></span></h3>
-                <p>الدور الآن على: <strong id="currentPlayerXName"></strong></p>
-                <p>نقاط اللوحات: <span id="teamXScore">0</span></p>
+            <div id="teamX-status" class="team-card x-style">
+                <span class="team-name" id="displayTeamXName"></span>
+                <div class="score">نقاط: <span id="teamXScore">0</span></div>
             </div>
             
-            <div id="teamO-status" class="team-status">
-                <h3>الفريق O: <span id="displayTeamOName"></span></h3>
-                <p>الدور الآن على: <strong id="currentPlayerOName"></strong></p>
-                <p>نقاط اللوحات: <span id="teamOScore">0</span></p>
+            <div id="timer-display" class="timer-ring">--</div>
+
+            <div id="teamO-status" class="team-card o-style">
+                <span class="team-name" id="displayTeamOName"></span>
+                <div class="score">نقاط: <span id="teamOScore">0</span></div>
             </div>
         </div>
 
-        <div id="meta-board">
-        </div>
-
-        <div id="game-message" class="message"></div>
+        <div id="meta-board"></div>
+        <div id="free-move-msg" class="free-move-banner hidden">لعب حر للخصم!</div>
     </div>
-    
+
+    <div id="math-popup" class="popup hidden">
+        <div class="popup-content">
+            <div id="popup-timer-bar"></div>
+            <h2 id="math-question">8 × 7</h2>
+            <div id="answer-display">_</div>
+            <div class="numpad">
+                <button onclick="appendNum(1)">1</button>
+                <button onclick="appendNum(2)">2</button>
+                <button onclick="appendNum(3)">3</button>
+                <button onclick="appendNum(4)">4</button>
+                <button onclick="appendNum(5)">5</button>
+                <button onclick="appendNum(6)">6</button>
+                <button onclick="appendNum(7)">7</button>
+                <button onclick="appendNum(8)">8</button>
+                <button onclick="appendNum(9)">9</button>
+                <button onclick="clearNum()" class="clear">C</button>
+                <button onclick="appendNum(0)">0</button>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
