@@ -1,158 +1,116 @@
-let gameBoard = Array(9).fill(null).map(() => Array(9).fill(null));
-let metaBoard = Array(9).fill(null);
-let activeLocalBoard = null;
-let currentTeam = 'X';
-let gameActive = false;
-let mathOp, timeLimit, countdown, targetCell, currentAns;
-let playerAnswer = "";
-let qPool = [];
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Math X-O</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="matrix-bg"></div>
 
-const goldDiv = [
-    {a:4, b:2, ans:2}, {a:6, b:2, ans:3}, {a:8, b:2, ans:4},
-    {a:6, b:3, ans:2}, {a:9, b:3, ans:3}, {a:8, b:4, ans:2}
-];
+    <div id="setup-screen" class="screen">
+        <div class="glass-card">
+            <h1 class="neon-title">إكس أو الحسابية</h1>
+            <p class="instr-link" onclick="toggleModal(true)">التعليمات</p>
+            
+            <div class="setup-form">
+                <input type="text" id="teamXName" placeholder="اسم الفريق X" autocomplete="off">
+                <input type="text" id="teamOName" placeholder="اسم الفريق O" autocomplete="off">
+                
+                <div class="settings-grid">
+                    <div class="field">
+                        <label>نوع العمليات</label>
+                        <select id="mathOperation">
+                            <option value="random">عشوائي</option>
+                            <option value="add">جمع (+)</option>
+                            <option value="sub">طرح (-)</option>
+                            <option value="mul">ضرب (×)</option>
+                            <option value="div">قسمة (÷)</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>المؤقت (ثانية)</label>
+                        <select id="timerOption">
+                            <option value="0">بدون</option>
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="15">15</option>
+                        </select>
+                    </div>
+                </div>
+                <button id="startGameBtn" class="main-cta">ابدأ اللعب</button>
+            </div>
+        </div>
+    </div>
 
-// مصفوفة خلفية مصفوفة
-function initMatrix() {
-    const bg = document.getElementById('matrix-bg');
-    bg.innerHTML = '';
-    const cols = Math.floor(window.innerWidth / 30);
-    for(let i=0; i<cols; i++) {
-        let d = document.createElement('div');
-        d.style.position = 'absolute'; d.style.left = (i*30)+'px'; d.style.top = '-20px';
-        d.style.transition = 'top 10s linear'; d.innerText = Math.floor(Math.random()*9);
-        bg.appendChild(d);
-        setInterval(() => {
-            let t = parseInt(d.style.top);
-            if(t > window.innerHeight) d.style.top = '-20px';
-            else d.style.top = (t + 2) + 'px';
-        }, 100);
-    }
-}
+    <div id="game-screen" class="screen hidden">
+        <div class="game-wrapper">
+            <header class="game-header">
+                <div id="cardX" class="team-box x-theme">
+                    <span id="labelX">فريق X</span>
+                    <div class="score-text">النقاط: <span id="scoreX">0</span></div>
+                </div>
+                
+                <div class="timer-display">
+                    <span id="timer-num">--</span>
+                </div>
 
-function generateQ() {
-    let qT, ans;
-    do {
-        let a, b, op, type = mathOp === 'random' ? ['add','sub','mul','div'][Math.floor(Math.random()*4)] : mathOp;
-        if(type === 'div') {
-            let item = goldDiv[Math.floor(Math.random()*goldDiv.length)];
-            a = item.a; b = item.b; ans = item.ans; op = '÷';
-        } else if(type === 'mul') {
-            a = Math.floor(Math.random()*8)+2; b = Math.floor(Math.random()*8)+2;
-            ans = a*b; op = '×';
-        } else if(type === 'add') {
-            a = Math.floor(Math.random()*9)+1; b = Math.floor(Math.random()*9)+1;
-            ans = a+b; op = '+';
-        } else {
-            a = Math.floor(Math.random()*8)+2; b = Math.floor(Math.random()*(a-1))+1;
-            ans = a-b; op = '-';
-        }
-        qT = `${a} ${op} ${b}`;
-    } while(qPool.includes(qT));
-    qPool.push(qT); if(qPool.length > 20) qPool.shift();
-    currentAns = ans;
-    document.getElementById('question-text').textContent = qT;
-}
+                <div id="cardO" class="team-box o-theme">
+                    <span id="labelO">فريق O</span>
+                    <div class="score-text">النقاط: <span id="scoreO">0</span></div>
+                </div>
+            </header>
 
-function onCellClick(c) {
-    const bIdx = parseInt(c.parentElement.dataset.board);
-    if(!gameActive || c.textContent !== "" || metaBoard[bIdx]) return;
-    if(activeLocalBoard !== null && activeLocalBoard !== bIdx) return;
-    targetCell = c; playerAnswer = "";
-    document.getElementById('answer-box').textContent = "_";
-    document.getElementById('answer-box').style.color = "var(--text)";
-    document.getElementById('success-msg').classList.add('hidden');
-    document.getElementById('math-popup').classList.remove('hidden');
-    generateQ();
-    if(timeLimit > 0) startTimer();
-}
+            <main class="board-container">
+                <div id="meta-board"></div>
+            </main>
 
-function inputDigit(n) {
-    playerAnswer += n;
-    const box = document.getElementById('answer-box');
-    box.textContent = playerAnswer;
-    if(parseInt(playerAnswer) === currentAns) {
-        clearInterval(countdown);
-        box.style.color = "var(--win)";
-        document.getElementById('success-msg').classList.remove('hidden');
-        setTimeout(() => {
-            document.getElementById('math-popup').classList.add('hidden');
-            commitMove();
-        }, 1000);
-    } else if(playerAnswer.length >= currentAns.toString().length) {
-        setTimeout(() => { playerAnswer = ""; box.textContent = "_"; }, 300);
-    }
-}
+            <footer class="game-footer">
+                <button onclick="backToSetup()" class="btn-sub">العودة للإعدادات</button>
+                <button onclick="changeBgSpeed()" class="btn-sub">تغيير الخلفية</button>
+                <button onclick="toggleTheme()" class="btn-sub">تبديل المظهر</button>
+            </footer>
+        </div>
+    </div>
 
-function commitMove() {
-    const bIdx = parseInt(targetCell.parentElement.dataset.board);
-    const cIdx = parseInt(targetCell.dataset.cell);
-    gameBoard[bIdx][cIdx] = currentTeam;
-    targetCell.textContent = currentTeam;
-    targetCell.classList.add(currentTeam);
-    checkWin(bIdx, cIdx);
-}
+    <div id="math-popup" class="popup hidden">
+        <div class="popup-content">
+            <div id="popup-timer-bar"></div>
+            <p class="pop-hint">أجب لتنفيذ حركتك:</p>
+            <h2 id="question-text">--</h2>
+            <div id="answer-input">_</div>
+            <div id="success-feedback" class="hidden">✓ إجابة صحيحة!</div>
+            
+            <div class="numpad">
+                <button onclick="keyIn(1)">1</button>
+                <button onclick="keyIn(2)">2</button>
+                <button onclick="keyIn(3)">3</button>
+                <button onclick="keyIn(4)">4</button>
+                <button onclick="keyIn(5)">5</button>
+                <button onclick="keyIn(6)">6</button>
+                <button onclick="keyIn(7)">7</button>
+                <button onclick="keyIn(8)">8</button>
+                <button onclick="keyIn(9)">9</button>
+                <button onclick="clearAll()" class="c-key">C</button>
+                <button onclick="keyIn(0)">0</button>
+                <button onclick="backspace()" class="b-key">⌫</button>
+            </div>
+        </div>
+    </div>
 
-function checkWin(bIdx, cIdx) {
-    const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-    let won = wins.some(w => gameBoard[bIdx][w[0]] && gameBoard[bIdx][w[0]] === gameBoard[bIdx][w[1]] && gameBoard[bIdx][w[0]] === gameBoard[bIdx][w[2]]);
-    if(won) {
-        metaBoard[bIdx] = currentTeam;
-        const bDiv = document.querySelector(`[data-board="${bIdx}"]`);
-        const m = document.createElement('div'); m.className = 'big-mark';
-        m.style.color = currentTeam === 'X' ? 'var(--x-col)' : 'var(--o-col)';
-        m.innerText = currentTeam; bDiv.appendChild(m);
-    }
-    if(wins.some(w => metaBoard[w[0]] && metaBoard[w[0]] === metaBoard[w[1]] && metaBoard[w[0]] === metaBoard[w[2]])) {
-        gameActive = false; alert("الفائز هو " + currentTeam);
-    }
-    activeLocalBoard = metaBoard[cIdx] ? null : cIdx;
-    currentTeam = currentTeam === 'X' ? 'O' : 'X';
-    updateUI();
-}
+    <div id="instr-modal" class="modal hidden">
+        <div class="modal-box">
+            <h2>كيف تلعب؟</h2>
+            <ul>
+                <li>اختر مربعاً وحل العملية الحسابية لتضع علامتك.</li>
+                <li>حركتك في المربع الصغير تحدد لخصمك المربع الكبير القادم.</li>
+                <li>إذا أخطأت أو انتهى الوقت، يصبح اللعب حراً للخصم.</li>
+            </ul>
+            <button onclick="toggleModal(false)" class="close-btn">إغلاق</button>
+        </div>
+    </div>
 
-function updateUI() {
-    document.getElementById('cardX').classList.toggle('active-turn', currentTeam === 'X');
-    document.getElementById('cardO').classList.toggle('active-turn', currentTeam === 'O');
-    document.querySelectorAll('.local-board').forEach((b, i) => b.classList.toggle('active', activeLocalBoard===null || activeLocalBoard===i));
-    document.getElementById('scoreX').textContent = metaBoard.filter(v=>v==='X').length;
-    document.getElementById('scoreO').textContent = metaBoard.filter(v=>v==='O').length;
-}
-
-function startTimer() {
-    let l = timeLimit;
-    countdown = setInterval(() => {
-        l--; document.getElementById('main-timer').textContent = l;
-        if(l<=0) { clearInterval(countdown); document.getElementById('math-popup').classList.add('hidden'); activeLocalBoard = null; currentTeam = currentTeam==='X'?'O':'X'; updateUI(); }
-    }, 1000);
-}
-
-function backToSetup() {
-    if(confirm("هل تريد العودة للإعدادات؟ سيتم فقدان التقدم.")) location.reload();
-}
-
-function toggleModal(id, show) { document.getElementById(id).classList.toggle('hidden', !show); }
-
-document.getElementById('startGameButton').onclick = () => {
-    mathOp = document.getElementById('mathOperation').value;
-    timeLimit = parseInt(document.getElementById('timerOption').value);
-    document.getElementById('labelX').textContent = document.getElementById('teamXName').value || 'فريق X';
-    document.getElementById('labelO').textContent = document.getElementById('teamOName').value || 'فريق O';
-    document.getElementById('setup-screen').classList.add('hidden');
-    document.getElementById('game-screen').classList.remove('hidden');
-    const meta = document.getElementById('meta-board');
-    meta.innerHTML = '';
-    for(let i=0; i<9; i++) {
-        let lb = document.createElement('div'); lb.className = 'local-board'; lb.dataset.board = i;
-        for(let j=0; j<9; j++) {
-            let c = document.createElement('div'); c.className = 'cell'; c.dataset.cell = j;
-            c.onclick = (e) => onCellClick(e.target); lb.appendChild(c);
-        }
-        meta.appendChild(lb);
-    }
-    gameActive = true; updateUI();
-};
-
-window.onload = initMatrix;
-function clearInput() { playerAnswer = ""; document.getElementById('answer-box').textContent = "_"; }
-function backspaceInput() { playerAnswer = playerAnswer.slice(0,-1); document.getElementById('answer-box').textContent = playerAnswer || "_"; }
+    <script src="script.js"></script>
+</body>
+</html>
