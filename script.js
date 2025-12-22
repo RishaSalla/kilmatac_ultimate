@@ -1,205 +1,174 @@
 /* =========================================
-   1. الحالة العامة للمباراة (Game State)
+   1. المتغيرات والبيانات الأساسية
    ========================================= */
-let turn = 'X', gameActive = false, activeBigIdx = null;
-let bigBoardStatus = Array(9).fill(null);
-let fullLogic = Array(9).fill(null).map(() => Array(9).fill(null));
+let currentTurn = 'X';
+let isGameActive = false;
+let activeBigIdx = null; // يحدد المربع الكبير المسموح اللعب فيه
+let bigBoardStatus = Array(9).fill(null); 
+let internalLogic = Array(9).fill(null).map(() => Array(9).fill(null));
 
-let selectedLevel = 1, timerLimit = 10, countdown, targetCell, correctAns;
-let playerInput = "";
+let selectedLevel = 1, timerLimit, countdown, targetCell, mathAns;
+let inputBuffer = "";
 
-// ربط العناصر الرئيسية لضمان الوصول السريع
-const setupScreen = document.getElementById('setup-screen');
-const gameScreen = document.getElementById('game-screen');
-const mathModal = document.getElementById('math-modal');
-const helpModal = document.getElementById('help-modal');
-const startBtn = document.getElementById('startActionBtn');
+// ربط العناصر الرئيسية لضمان الوصول السريع وعدم تعطل الأزرار
+const setupView = document.getElementById('setup-view');
+const gameView = document.getElementById('game-view');
+const mathModal = document.getElementById('modalMathChallenge');
+const helpModal = document.getElementById('modalInstructions');
 
 /* =========================================
-   2. تهيئة الواجهة عند التشغيل (Initialization)
+   2. تهيئة الواجهة عند التشغيل
    ========================================= */
-window.onload = () => {
-    // التأكد من إخفاء النوافذ المنبثقة فور التحميل لمنع "التجميد"
-    mathModal.style.display = "none";
-    helpModal.style.display = "none";
-    gameScreen.style.display = "none";
-    
-    // تفعيل اختيار المستويات من البطاقات
-    document.querySelectorAll('.level-card').forEach(card => {
-        card.addEventListener('click', () => {
-            document.querySelectorAll('.level-card').forEach(c => c.classList.remove('active'));
-            card.classList.add('active');
-            selectedLevel = parseInt(card.dataset.lvl);
-        });
+document.querySelectorAll('.level-box').forEach(box => {
+    box.addEventListener('click', () => {
+        document.querySelectorAll('.level-box').forEach(b => b.classList.remove('active'));
+        box.classList.add('active');
+        selectedLevel = parseInt(box.dataset.lvl);
     });
+});
 
-    // ربط زر البدء
-    startBtn.onclick = launchGame;
-};
+// تفعيل زر البدء بشكل مباشر وصارم
+document.getElementById('btnStartGame').addEventListener('click', launchTheGame);
 
-/* =========================================
-   3. منطق بدء المباراة (Game Launch)
-   ========================================= */
-function launchGame() {
-    // جلب الإعدادات من الواجهة
-    timerLimit = parseInt(document.getElementById('timerSelector').value);
-    const nameX = document.getElementById('pXName').value || "TEAM X";
-    const nameO = document.getElementById('pOName').value || "TEAM O";
+function launchTheGame() {
+    // جلب الإعدادات
+    timerLimit = parseInt(document.getElementById('timerConfig').value);
+    const pX = document.getElementById('nameX').value || "TEAM X";
+    const pO = document.getElementById('nameO').value || "TEAM O";
+    
+    document.getElementById('displayNameX').textContent = pX;
+    document.getElementById('displayNameO').textContent = pO;
 
-    document.getElementById('view-X').textContent = nameX;
-    document.getElementById('view-O').textContent = nameO;
-
-    // تصفير البيانات
+    // تصفير بيانات اللعبة
     bigBoardStatus.fill(null);
-    fullLogic = Array(9).fill(null).map(() => Array(9).fill(null));
-    turn = 'X'; activeBigIdx = null; gameActive = true;
+    internalLogic = Array(9).fill(null).map(() => Array(9).fill(null));
+    currentTurn = 'X'; activeBigIdx = null; isGameActive = true;
 
-    // بناء اللوحة هندسياً
-    const boardContainer = document.getElementById('ultimate-board');
-    boardContainer.innerHTML = '';
-
+    // بناء اللوحة هندسياً برمجياً لضمان التمركز
+    const grid = document.getElementById('grid-ultimate-81');
+    grid.innerHTML = '';
     for (let i = 0; i < 9; i++) {
-        let lb = document.createElement('div');
+        const lb = document.createElement('div');
         lb.className = 'local-board';
         lb.dataset.board = i;
         for (let j = 0; j < 9; j++) {
-            let c = document.createElement('div');
+            const c = document.createElement('div');
             c.className = 'cell';
             c.dataset.cell = j;
-            c.onclick = () => handleCellSelection(c);
+            c.onclick = () => onCellInteraction(c);
             lb.appendChild(c);
         }
-        boardContainer.appendChild(lb);
+        grid.appendChild(lb);
     }
 
-    // الانتقال السلس بين الشاشات
-    setupScreen.classList.add('hidden');
-    setupScreen.style.display = "none";
-    
-    gameScreen.classList.remove('hidden');
-    gameScreen.style.display = "flex";
-    
-    syncUI();
+    // الانتقال بين الشاشات
+    setupView.classList.remove('active');
+    gameView.classList.add('active');
+    syncArenaState();
 }
 
 /* =========================================
-   4. محرك الأسئلة الرياضية (Math Engine)
+   3. منطق التحدي الرياضي (المستويات 1-4)
    ========================================= */
-function generateTask() {
-    let a, b, op, ans, display;
-    const getNum = () => Math.floor(Math.random() * 8) + 2; // أرقام من 2 لـ 9
+function generateChallenge() {
+    let a, b, op, ans, text;
+    const getRnd = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-    const ops = ['+', '-', '*', '/'];
-    const type = ops[Math.floor(Math.random() * ops.length)];
+    // محرك العمليات الأساسية
+    const types = ['+', '-', '*', '/'];
+    const type = types[Math.floor(Math.random() * types.length)];
 
-    // الحساب الأساسي
-    if (type === '+') { a = getNum(); b = getNum(); ans = a + b; op = '+'; }
-    else if (type === '-') { a = getNum() + 10; b = getNum(); ans = a - b; op = '-'; }
-    else if (type === '*') { a = getNum(); b = getNum(); ans = a * b; op = '×'; }
-    else { ans = getNum(); b = getNum(); a = ans * b; op = '÷'; }
+    if (type === '+') { a = getRnd(1, 9); b = getRnd(1, 9); ans = a + b; op = '+'; }
+    else if (type === '-') { a = getRnd(10, 18); b = getRnd(1, 9); ans = a - b; op = '-'; }
+    else if (type === '*') { a = getRnd(2, 9); b = getRnd(2, 9); ans = a * b; op = '×'; }
+    else { ans = getRnd(2, 9); b = getRnd(2, 9); a = ans * b; op = '÷'; }
 
-    // تشكيل السؤال حسب المستوى
+    // تشكيل السؤال حسب المستوى المختار
     switch(selectedLevel) {
-        case 1: display = `${a} ${op} ${b} = ?`; correctAns = ans; break;
-        case 2: 
-            if (Math.random() > 0.5) { display = `? ${op} ${b} = ${ans}`; correctAns = a; }
-            else { display = `${a} ${op} ? = ${ans}`; correctAns = b; }
-            break;
-        case 3: display = `? ${op} ? = ${ans}`; correctAns = a; break; // يمنع 1 برمجياً في getNum
-        case 4: 
-            let offset = Math.floor(Math.random() * 4) + 1;
-            display = `${a} ${op} ${b} = ? + ${offset}`;
-            correctAns = ans - offset;
-            break;
+        case 1: text = `${a} ${op} ${b} = ?`; mathAns = ans; break;
+        case 2: text = `? ${op} ${b} = ${ans}`; mathAns = a; break;
+        case 3: text = `? ${op} ? = ${ans}`; mathAns = a; break; // يمنع 1 من getRnd
+        case 4: let offset = getRnd(1, 3); text = `${a} ${op} ${b} = ? + ${offset}`; mathAns = ans - offset; break;
     }
 
-    document.getElementById('quest-text').textContent = display;
-    document.getElementById('lvl-indicator').textContent = `المستوى 0${selectedLevel}`;
+    document.getElementById('math-equation-text').textContent = text;
+    document.getElementById('math-lvl-tag').textContent = `تحدي المستوى 0${selectedLevel}`;
 }
 
 /* =========================================
-   5. إدارة الحركة والمدخلات
+   4. إدارة اللعب والحركة
    ========================================= */
-function handleCellSelection(cell) {
+function onCellInteraction(cell) {
     const bIdx = parseInt(cell.parentElement.dataset.board);
-    if (!gameActive || cell.textContent || bigBoardStatus[bIdx]) return;
+    if (!isGameActive || cell.textContent || bigBoardStatus[bIdx]) return;
     if (activeBigIdx !== null && activeBigIdx !== bIdx) return;
 
     targetCell = cell;
-    playerInput = "";
-    document.getElementById('user-input').textContent = "_";
+    inputBuffer = "";
+    document.getElementById('math-input-preview').textContent = "_";
     
-    // إظهار الحاسبة
     mathModal.style.display = "flex";
-    mathModal.classList.remove('hidden');
-    
-    generateTask();
+    generateChallenge();
     initTimer();
 }
 
-function numPress(n) {
-    playerInput += n;
-    document.getElementById('user-input').textContent = playerInput;
-    if (parseInt(playerInput) === correctAns) {
+function handleKeyPress(num) {
+    inputBuffer += num;
+    document.getElementById('math-input-preview').textContent = inputBuffer;
+    if (parseInt(inputBuffer) === mathAns) {
         clearInterval(countdown);
-        setTimeout(completeMove, 300);
-    } else if (playerInput.length >= 4) { numClear(); }
+        setTimeout(finalizeMove, 300);
+    } else if (inputBuffer.length >= 4) { handleClear(); }
 }
 
-function completeMove() {
+function finalizeMove() {
     mathModal.style.display = "none";
     const bIdx = parseInt(targetCell.parentElement.dataset.board);
     const cIdx = parseInt(targetCell.dataset.cell);
 
-    targetCell.textContent = turn;
-    targetCell.classList.add(turn);
-    fullLogic[bIdx][cIdx] = turn;
+    targetCell.textContent = currentTurn;
+    targetCell.classList.add(currentTurn);
+    internalLogic[bIdx][cIdx] = currentTurn;
 
-    // توجيه الخصم (نظام اللعب الحر)
+    // تحديد المربع التالي (قوة التوجيه)
     activeBigIdx = (bigBoardStatus[cIdx] === null) ? cIdx : null;
-    turn = (turn === 'X') ? 'O' : 'X';
-    syncUI();
+    currentTurn = (currentTurn === 'X') ? 'O' : 'X';
+    syncArenaState();
 }
 
 /* =========================================
-   6. الوظائف المساعدة (Utilities)
+   5. المساعدات والواجهة
    ========================================= */
 function initTimer() {
     if (timerLimit === 0) return;
-    let time = timerLimit;
-    const progress = document.getElementById('progress');
-    const text = document.getElementById('timer-text');
-    
+    let s = timerLimit;
+    const prog = document.getElementById('timer-progress');
+    const txt = document.getElementById('timer-countdown');
     clearInterval(countdown);
     countdown = setInterval(() => {
-        time--;
-        text.textContent = time;
-        progress.style.strokeDashoffset = 283 - (time / timerLimit * 283);
-
-        if (time <= 0) {
+        s--;
+        txt.textContent = s;
+        prog.style.strokeDashoffset = 283 - (s / timerLimit * 283);
+        if (s <= 0) {
             clearInterval(countdown);
             mathModal.style.display = "none";
-            activeBigIdx = null; // عقوبة: لعب حر للخصم
-            turn = (turn === 'X') ? 'O' : 'X';
-            syncUI();
+            activeBigIdx = null; 
+            currentTurn = (currentTurn === 'X') ? 'O' : 'X';
+            syncArenaState();
         }
     }, 1000);
 }
 
-function syncUI() {
-    document.getElementById('status-card-X').style.opacity = (turn === 'X') ? "1" : "0.3";
-    document.getElementById('status-card-O').style.opacity = (turn === 'O') ? "1" : "0.3";
-    
+function syncArenaState() {
+    document.getElementById('p-stats-X').style.opacity = (currentTurn === 'X') ? "1" : "0.3";
+    document.getElementById('p-stats-O').style.opacity = (currentTurn === 'O') ? "1" : "0.3";
     document.querySelectorAll('.local-board').forEach((lb, i) => {
-        lb.style.opacity = (activeBigIdx === null || activeBigIdx === i) ? "1" : "0.15";
-        lb.style.pointerEvents = (activeBigIdx === null || activeBigIdx === i) ? "all" : "none";
+        lb.style.opacity = (activeBigIdx === null || activeBigIdx === i) ? "1" : "0.1";
     });
-
-    document.getElementById('logic-banner').classList.toggle('hidden', activeBigIdx !== null);
+    document.getElementById('free-play-msg').classList.toggle('hidden', activeBigIdx !== null);
 }
 
-function openInstructions() { helpModal.style.display = "flex"; helpModal.classList.remove('hidden'); }
-function closeInstructions() { helpModal.style.display = "none"; helpModal.classList.add('hidden'); }
-function numClear() { playerInput = ""; document.getElementById('user-input').textContent = "_"; }
-function numDel() { playerInput = playerInput.slice(0, -1); document.getElementById('user-input').textContent = playerInput || "_"; }
-function toggleDarkMode() { document.body.classList.toggle('dark-mode'); }
+function toggleInstructionModal(show) { helpModal.style.display = show ? "flex" : "none"; }
+function toggleVisualMode() { document.body.classList.toggle('dark-mode'); }
+function handleClear() { inputBuffer = ""; document.getElementById('math-input-preview').textContent = "_"; }
+function handleDelete() { inputBuffer = inputBuffer.slice(0, -1); document.getElementById('math-input-preview').textContent = inputBuffer || "_"; }
