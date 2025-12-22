@@ -1,141 +1,154 @@
 /* =========================================
-   1. الأساسيات والوضع الفاتح (Light Mode)
+   1. المتغيرات والسمات العامة (Professional Palette)
    ========================================= */
 :root {
-    --bg-color: #f0f2f5;
-    --card-bg: #ffffff;
-    --text-color: #1c1e21;
-    --border-ui: #ced4da;
-    --x-color: #d63031;
-    --o-color: #0984e3;
-    --accent: #00b894;
-    --shadow-ui: 0 10px 30px rgba(0,0,0,0.08);
+    --primary-bg: #f5f7fa;
+    --glass-bg: rgba(255, 255, 255, 0.85);
+    --glass-border: rgba(255, 255, 255, 0.5);
+    --text-dark: #1e293b;
+    --text-muted: #64748b;
+    --neon-x: #ef4444;
+    --neon-o: #3b82f6;
+    --accent-green: #10b981;
+    --shadow-pro: 0 20px 50px rgba(0, 0, 0, 0.1);
 }
 
 body.dark-mode {
-    --bg-color: #0b0e14;
-    --card-bg: #1c2128;
-    --text-color: #f8f9fa;
-    --border-ui: #30363d;
-    --shadow-ui: 0 10px 40px rgba(0,0,0,0.4);
+    --primary-bg: #0f172a;
+    --glass-bg: rgba(30, 41, 59, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --text-dark: #f8fafc;
+    --text-muted: #94a3b8;
+    --shadow-pro: 0 25px 60px rgba(0, 0, 0, 0.4);
 }
 
 body {
-    margin: 0; padding: 0;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    font-family: 'Segoe UI', system-ui, sans-serif;
+    margin: 0; padding: 0; 
+    background-color: var(--primary-bg);
+    color: var(--text-dark);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     height: 100vh; width: 100vw;
     display: flex; align-items: center; justify-content: center;
     overflow: hidden; direction: rtl;
+    transition: all 0.4s ease;
 }
 
-/* طبقة الخلفية الرقمية المعزولة */
-#background-canvas-layer {
-    position: fixed; inset: 0; z-index: 1; opacity: 0.05; pointer-events: none;
+/* طبقة الشبكة الخلفية (Gaming Grid) */
+#dynamic-bg {
+    position: fixed; inset: 0; z-index: -1;
+    background: radial-gradient(circle at center, transparent 0%, var(--primary-bg) 80%);
 }
-
-#master-wrapper {
-    position: relative; z-index: 10;
+.grid-overlay {
     width: 100%; height: 100%;
-    display: flex; align-items: center; justify-content: center;
+    background-image: linear-gradient(var(--glass-border) 1px, transparent 1px),
+                      linear-gradient(90deg, var(--glass-border) 1px, transparent 1px);
+    background-size: 50px 50px;
+    opacity: 0.2;
 }
 
 /* =========================================
-   2. الشاشات والنوافذ (التمركز المطلق)
+   2. شاشة الإعدادات (The Hub)
    ========================================= */
-.ui-screen, .full-modal {
-    position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    background: rgba(0,0,0,0.02);
+.main-hub {
+    background: var(--glass-bg);
+    backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-border);
+    padding: 40px; border-radius: 30px;
+    box-shadow: var(--shadow-pro);
+    width: min(550px, 92%);
+    animation: slideUp 0.6s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-.full-modal { z-index: 1000; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); }
-.hidden { display: none !important; }
+@keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
-.glass-box, .modal-card, .math-challenge-card {
-    background: var(--card-bg);
-    padding: 35px; border-radius: 24px;
-    box-shadow: var(--shadow-ui);
-    width: min(450px, 90%);
-    text-align: center; border: 1px solid var(--border-ui);
+.brand-title { font-size: 2.5rem; font-weight: 900; letter-spacing: -1px; margin: 0; }
+.pro-tag { background: var(--accent-green); color: white; padding: 2px 10px; border-radius: 5px; font-size: 0.9rem; vertical-align: middle; }
+.brand-subtitle { color: var(--text-muted); margin-bottom: 30px; }
+
+/* بطاقات المستويات (Interactive Grid) */
+.levels-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 25px 0;
 }
+
+.level-card {
+    background: var(--primary-bg);
+    border: 2px solid transparent;
+    padding: 15px; border-radius: 15px;
+    cursor: pointer; text-align: right;
+    transition: all 0.3s ease;
+}
+
+.level-card.active {
+    border-color: var(--neon-o);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+}
+
+.level-num { font-size: 0.8rem; font-weight: bold; color: var(--neon-o); margin-bottom: 5px; }
+.level-card h3 { font-size: 1rem; margin: 0; }
+.level-card p { font-size: 0.75rem; color: var(--text-muted); margin: 5px 0 0; }
 
 /* =========================================
-   3. هندسة اللوحة (الحل الجذري للزحف والميلان)
+   3. ساحة اللعب (The Grid Arena)
    ========================================= */
-.game-interface {
-    width: 100%; height: 100%; max-width: 1100px;
-    display: flex; flex-direction: column; padding: 20px; box-sizing: border-box;
+.arena-wrapper {
+    display: flex; flex-direction: column; width: 100vw; height: 100vh;
+    padding: 20px; box-sizing: border-box;
 }
 
-.game-top-bar { height: 15vh; display: flex; justify-content: space-between; align-items: center; }
+.arena-header { display: flex; justify-content: space-between; align-items: center; height: 12vh; }
 
-.player-status-card {
-    background: var(--card-bg); padding: 12px 25px; border-radius: 15px;
-    min-width: 150px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-}
-.x-theme { border-bottom: 5px solid var(--x-color); }
-.o-theme { border-bottom: 5px solid var(--o-color); }
-
-.timer-orb { font-size: 3rem; font-weight: 800; color: var(--accent); }
-
-.game-arena {
-    flex: 1; display: flex; align-items: center; justify-content: center;
-}
-
-/* تثبيت اللوحة بمقاسات فيزيائية صلبة */
+/* تثبيت اللوحة هندسياً (Zero Drifting) */
 #grid-81-container {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
-    width: min(68vh, 92vw); height: min(68vh, 92vw); /* لضمان التربع التام */
-    background: var(--border-ui); padding: 12px; border-radius: 18px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    width: min(65vh, 85vw); height: min(65vh, 85vw);
+    background: var(--glass-border); padding: 10px; border-radius: 20px;
+    margin: auto; /* يضمن التوسط المطلق */
 }
 
-.local-board {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px;
-}
+.local-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
 
-/* الخلية: هندسة الصندوق المحبوس */
 .cell {
-    background: var(--card-bg);
-    aspect-ratio: 1/1; /* حجز مساحة مربعة فورية */
-    border-radius: 6px;
+    background: var(--glass-bg);
+    aspect-ratio: 1/1; border-radius: 8px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 1.6rem; font-weight: 900;
-    cursor: pointer;
-    position: relative;
-    flex-shrink: 0; /* منع المربع من الانضغاط مهما حدث */
-    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    font-size: 1.8rem; font-weight: 900;
+    transition: all 0.2s ease;
+    flex-shrink: 0; /* يمنع التقلص */
 }
 
-.cell:hover { transform: scale(1.05); z-index: 5; background: var(--bg-color); }
+.cell:hover { transform: scale(1.05); background: var(--card-bg); }
 
-/* العلامات: X و O كأشباح فوقية لا تلمس الجدران */
-.cell[data-content="X"]::after, .cell[data-content="O"]::after {
-    content: attr(data-content);
-    position: absolute;
-    display: flex; align-items: center; justify-content: center;
-}
-
-.cell[data-content="X"]::after { color: var(--x-color); }
-.cell[data-content="O"]::after { color: var(--o-color); }
+/* ألوان العلامات */
+.cell.X { color: var(--neon-x); text-shadow: 0 0 10px rgba(239, 68, 68, 0.3); }
+.cell.O { color: var(--neon-o); text-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
 
 /* =========================================
-   4. العناصر التفاعلية
+   4. المؤقت والمودال (UI Elements)
    ========================================= */
-.launch-btn, .modal-close-btn {
-    width: 100%; padding: 16px; margin-top: 20px; border-radius: 12px;
-    border: none; background: var(--accent); color: white;
-    font-size: 1.3rem; font-weight: bold; cursor: pointer;
+.arena-timer { position: relative; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; }
+.timer-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.timer-bg { fill: none; stroke: var(--glass-border); stroke-width: 5; }
+#timer-progress { 
+    fill: none; stroke: var(--accent-green); stroke-width: 5; 
+    stroke-linecap: round; stroke-dasharray: 283; stroke-dashoffset: 0;
+    transition: stroke-dashoffset 1s linear;
 }
+#timer-display { position: absolute; font-size: 1.5rem; font-weight: bold; }
 
-.numpad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
-.numpad-grid button {
-    padding: 18px; border-radius: 10px; border: 1px solid var(--border-ui);
-    background: var(--bg-color); color: var(--text-color); font-size: 1.4rem; cursor: pointer;
+.launch-game-btn {
+    width: 100%; padding: 18px; border-radius: 15px; border: none;
+    background: var(--neon-o); color: white; font-size: 1.2rem; font-weight: bold;
+    cursor: pointer; transition: 0.3s;
 }
-.btn-clear { color: var(--x-color) !important; font-weight: bold; }
+.launch-game-btn:hover { background: #2563eb; transform: translateY(-2px); }
 
-.game-bottom-bar { height: 10vh; display: flex; justify-content: center; gap: 20px; }
-.action-btn { padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border-ui); background: var(--card-bg); color: var(--text-color); cursor: pointer; }
+/* مودال الأسئلة (The Math Hub) */
+.math-window {
+    border: 2px solid var(--neon-o);
+    box-shadow: 0 0 40px rgba(59, 130, 246, 0.2);
+}
+.equation-text { font-size: 3rem; margin: 20px 0; color: var(--text-dark); direction: ltr; }
+.input-display {
+    background: var(--primary-bg); padding: 15px; border-radius: 10px;
+    margin-bottom: 20px; font-size: 2.5rem; font-weight: 800; color: var(--accent-green);
+}
