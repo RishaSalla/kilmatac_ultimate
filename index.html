@@ -3,143 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>X-O MATH ULTIMATE</title>
+    <title>X-O MATH PRO - النسخة الكاملة</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="light-mode">
-    
-    <div id="app-bg-layer">
-        <div class="grid-mesh"></div>
-    </div>
+    <div id="app-bg-mesh"></div>
 
-    <div id="app-container">
+    <div id="main-wrapper">
 
         <div id="setup-screen" class="app-screen active">
-            <div class="menu-card">
+            <div class="glass-card main-menu">
                 <header class="menu-header">
-                    <h1 class="game-logo">X-O MATH <span class="badge-pro">PRO</span></h1>
-                    <p class="game-tagline">النظام الحسابي الاستراتيجي المتطور</p>
+                    <h1 class="logo-text">X-O MATH <span class="badge-pro">PRO</span></h1>
+                    <p class="tagline">الدمج بين الذكاء الحسابي والتخطيط الاستراتيجي</p>
                 </header>
 
                 <div class="menu-body">
-                    <div class="players-input-group">
-                        <div class="input-field">
-                            <input type="text" id="nameX" placeholder="اسم فريق X" autocomplete="off">
+                    <div class="players-grid">
+                        <div class="input-box">
+                            <label>فريق X</label>
+                            <input type="text" id="inputNameX" placeholder="أدخل الاسم..." autocomplete="off">
                         </div>
-                        <div class="vs-text">ضد</div>
-                        <div class="input-field">
-                            <input type="text" id="nameO" placeholder="اسم فريق O" autocomplete="off">
+                        <div class="vs-circle">VS</div>
+                        <div class="input-box">
+                            <label>فريق O</label>
+                            <input type="text" id="inputNameO" placeholder="أدخل الاسم..." autocomplete="off">
                         </div>
                     </div>
 
-                    <div class="levels-selection-grid">
+                    <div class="level-cards-container">
                         <div class="lvl-card active" data-lvl="1">
-                            <span class="lvl-index">01</span>
-                            <div class="lvl-content">
-                                <h4>المستوى المباشر</h4>
-                                <p>عمليات أساسية ضمن النطاق 1-9</p>
+                            <div class="lvl-num">01</div>
+                            <div class="lvl-info">
+                                <h3>المستوى الكلاسيكي</h3>
+                                <p>عمليات مباشرة بسيطة (1-9)</p>
                             </div>
                         </div>
                         <div class="lvl-card" data-lvl="2">
-                            <span class="lvl-index">02</span>
-                            <div class="lvl-content">
-                                <h4>العدد المفقود</h4>
-                                <p>استنتاج المتغير المجهول في المعادلة</p>
+                            <div class="lvl-num">02</div>
+                            <div class="lvl-info">
+                                <h3>العدد المفقود</h3>
+                                <p>أوجد الرقم الذي يكمل المعادلة</p>
                             </div>
                         </div>
                         <div class="lvl-card" data-lvl="3">
-                            <span class="lvl-index">03</span>
-                            <div class="lvl-content">
-                                <h4>الفراغ المزدوج</h4>
-                                <p>تحديد رقمين مفقودين (بدون الرقم 1)</p>
+                            <div class="lvl-num">03</div>
+                            <div class="lvl-info">
+                                <h3>الفراغ المزدوج</h3>
+                                <p>تحدي الرقمين (يمنع استخدام 1)</p>
                             </div>
                         </div>
                         <div class="lvl-card" data-lvl="4">
-                            <span class="lvl-index">04</span>
-                            <div class="lvl-content">
-                                <h4>الميزان الرقمي</h4>
+                            <div class="lvl-num">04</div>
+                            <div class="lvl-info">
+                                <h3>الميزان الرقمي</h3>
                                 <p>موازنة طرفي المعادلة الحسابية</p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="extra-configs">
-                        <div class="config-item">
-                            <label>مؤقت التفكير</label>
-                            <select id="gameTimer">
+                    <div class="quick-settings">
+                        <div class="setting-row">
+                            <label>مؤقت التفكير:</label>
+                            <select id="selectTimer">
                                 <option value="0">بدون وقت</option>
                                 <option value="5">5 ثوانٍ</option>
                                 <option value="10" selected>10 ثوانٍ</option>
                                 <option value="20">20 ثانية</option>
                             </select>
                         </div>
-                        <button class="btn-secondary" onclick="openInstruction()">دليل القواعد</button>
+                        <button class="btn-info" onclick="toggleHelpModal(true)">📖 دليل اللعب والقواعد الكامل</button>
                     </div>
                 </div>
 
                 <footer class="menu-footer">
-                    <button class="btn-primary-launch" onclick="launchGame()">تأكيد وبدء اللعبة</button>
+                    <button class="btn-start" id="btnLaunchGame">تأكيد وبدء المباراة</button>
                 </footer>
             </div>
         </div>
 
         <div id="game-screen" class="app-screen hidden">
-            <div class="arena-layout">
-                <header class="arena-top">
-                    <div id="p-card-X" class="p-card x-side">
-                        <h2 id="disp-nameX">TEAM X</h2>
-                        <div class="p-stats">النقاط: <span id="p-scoreX">0</span></div>
+            <div class="arena-container">
+                <header class="arena-top-bar">
+                    <div id="cardX" class="p-status-card x-theme">
+                        <h2 id="displayNameX">TEAM X</h2>
+                        <div class="score-tag">النقاط: <span id="scoreX">0</span></div>
                     </div>
 
-                    <div class="arena-timer-hub">
-                        <div class="timer-circle-wrap">
-                            <svg viewBox="0 0 100 100">
-                                <circle class="t-bg" cx="50" cy="50" r="45"></circle>
-                                <circle id="t-progress" cx="50" cy="50" r="45"></circle>
-                            </svg>
-                            <span id="t-count">10</span>
-                        </div>
+                    <div class="main-timer-hub">
+                        <svg class="timer-ring" viewBox="0 0 100 100">
+                            <circle class="ring-track" cx="50" cy="50" r="45"></circle>
+                            <circle id="ring-progress" cx="50" cy="50" r="45"></circle>
+                        </svg>
+                        <span id="timerText">10</span>
                     </div>
 
-                    <div id="p-card-O" class="p-card o-side">
-                        <h2 id="disp-nameO">TEAM O</h2>
-                        <div class="p-stats">النقاط: <span id="p-scoreO">0</span></div>
+                    <div id="cardO" class="p-status-card o-theme">
+                        <h2 id="displayNameO">TEAM O</h2>
+                        <div class="score-tag">النقاط: <span id="scoreO">0</span></div>
                     </div>
                 </header>
 
-                <main class="arena-center">
-                    <div id="main-grid-81"></div>
+                <main class="arena-grid-area">
+                    <div id="board-81-wrapper"></div>
                 </main>
 
-                <footer class="arena-bottom">
-                    <div id="move-status-msg" class="msg-banner hidden">قوة اللعب الحر مفعلة</div>
-                    <div class="arena-btns">
-                        <button onclick="location.reload()">الرئيسية</button>
-                        <button onclick="toggleTheme()">المظهر</button>
+                <footer class="arena-bottom-bar">
+                    <div id="statusBanner" class="banner hidden">⚡ قوة اللعب الحر متاحة الآن!</div>
+                    <div class="arena-controls">
+                        <button onclick="location.reload()">العودة للرئيسية</button>
+                        <button onclick="toggleDarkMode()">تبديل المظهر</button>
                     </div>
                 </footer>
             </div>
         </div>
 
-        <div id="modal-overlay" class="modal-layer hidden">
-            <div id="help-pane" class="modal-pane hidden">
-                <h3>دليل النظام</h3>
-                <div class="pane-content">
-                    <p><strong>قاعدة التوجيه:</strong> المربع الصغير الذي تختاره يحدد موقع خصمك التالي في المربعات الكبيرة.</p>
-                    <p><strong>الفوز:</strong> استحوذ على 3 مربعات كبيرة متتالية للفوز بالمباراة.</p>
+        <div id="modalHelp" class="modal-overlay hidden">
+            <div class="modal-box help-box">
+                <header class="modal-header">📜 دليل القواعد الكامل</header>
+                <div class="modal-content">
+                    <section>
+                        <h4>1. نظام التوجيه الاستراتيجي</h4>
+                        <p>هذه ليست لعبة إكس أو عادية؛ المربع الصغير الذي تختاره داخل المربع الكبير يحدد لخصمك في أي مربع كبير يجب أن يلعب في حركته القادمة.</p>
+                    </section>
+                    <section>
+                        <h4>2. شروط الفوز والسيطرة</h4>
+                        <p>للفوز بمربع كبير، يجب أن تحصل على 3 مربعات صغيرة متتالية بداخله. وللفوز بالمباراة كاملة، يجب أن تسيطر على 3 مربعات كبيرة بشكل متتالي.</p>
+                    </section>
+                    <section>
+                        <h4>3. قوة اللعب الحر</h4>
+                        <p>إذا وجهك الخصم إلى مربع كبير مكتمل أو فاز به أحد الطرفين، يُفتح لك كامل الجدول كـ "لعب حر" لتختار أي مكان تريد.</p>
+                    </section>
+                    <section>
+                        <h4>4. مستويات التحدي الحسابي</h4>
+                        <ul>
+                            <li><strong>المستوى 1:</strong> عمليات مباشرة (جمع، طرح، ضرب، قسمة) بنواتج من 1 إلى 9.</li>
+                            <li><strong>المستوى 2:</strong> استنتاج الرقم المفقود في طرف المعادلة.</li>
+                            <li><strong>المستوى 3:</strong> إيجاد رقمين يحققان الناتج (يُمنع استخدام الرقم 1).</li>
+                            <li><strong>المستوى 4:</strong> موازنة كفتي الميزان بوضع الرقم الصحيح.</li>
+                        </ul>
+                    </section>
                 </div>
-                <button class="btn-close" onclick="closeModal()">إغلاق</button>
+                <button class="btn-close-modal" onclick="toggleHelpModal(false)">فهمت القواعد</button>
             </div>
+        </div>
 
-            <div id="math-pane" class="modal-pane hidden">
-                <div class="math-header"><span id="math-lvl-label">المستوى 1</span></div>
-                <div id="math-eq" class="math-eq-text">-- = --</div>
-                <div class="math-input-view" id="math-input">_</div>
-                <div class="math-numpad">
-                    <button onclick="keyPress(1)">1</button><button onclick="keyPress(2)">2</button><button onclick="keyPress(3)">3</button>
-                    <button onclick="keyPress(4)">4</button><button onclick="keyPress(5)">5</button><button onclick="keyPress(6)">6</button>
-                    <button onclick="keyPress(7)">7</button><button onclick="keyPress(8)">8</button><button onclick="keyPress(9)">9</button>
-                    <button class="key-act" onclick="keyClear()">C</button><button onclick="keyPress(0)">0</button><button class="key-act" onclick="keyDel()">مسح</button>
+        <div id="modalMath" class="modal-overlay hidden">
+            <div class="modal-box math-box">
+                <div id="mathLevelTag" class="math-tag">LEVEL 1</div>
+                <div id="mathEquation" class="math-display">-- = --</div>
+                <div class="math-input-box" id="mathPreview">_</div>
+                <div class="math-keypad">
+                    <button onclick="pressKey(1)">1</button><button onclick="pressKey(2)">2</button><button onclick="pressKey(3)">3</button>
+                    <button onclick="pressKey(4)">4</button><button onclick="pressKey(5)">5</button><button onclick="pressKey(6)">6</button>
+                    <button onclick="pressKey(7)">7</button><button onclick="pressKey(8)">8</button><button onclick="pressKey(9)">9</button>
+                    <button class="key-clear" onclick="clearKey()">C</button><button onclick="pressKey(0)">0</button><button class="key-del" onclick="delKey()">تراجع</button>
                 </div>
             </div>
         </div>
