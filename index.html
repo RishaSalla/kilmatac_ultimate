@@ -2,120 +2,113 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>XO</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="dark-mode">
     <div id="animated-bg"></div>
 
-    <div id="app-wrapper">
+    <div id="app-root">
         <div id="view-setup" class="view active">
-            <div class="main-card">
+            <div class="glass-card">
                 <h1 class="logo">XO</h1>
-                
-                <div class="setup-grid">
-                    <div class="player-inputs">
+                <div class="setup-body">
+                    <div class="input-row">
                         <input type="text" id="nameX" placeholder="لاعب X" autocomplete="off">
+                        <div class="vs">VS</div>
                         <input type="text" id="nameO" placeholder="لاعب O" autocomplete="off">
                     </div>
 
-                    <div class="levels-container">
-                        <div class="level-btn active" data-lvl="1">
-                            <span class="lvl-num">1</span>
-                            <span class="lvl-name">المستوى الأول</span>
-                        </div>
-                        <div class="level-btn" data-lvl="2">
-                            <span class="lvl-num">2</span>
-                            <span class="lvl-name">المستوى الثاني</span>
-                        </div>
-                        <div class="level-btn" data-lvl="3">
-                            <span class="lvl-num">3</span>
-                            <span class="lvl-name">المستوى الثالث</span>
-                        </div>
-                        <div class="level-btn" data-lvl="4">
-                            <span class="lvl-num">4</span>
-                            <span class="lvl-name">المستوى الرابع</span>
-                        </div>
+                    <div class="levels-grid">
+                        <div class="lvl-btn active" data-lvl="1">المستوى 1</div>
+                        <div class="lvl-btn" data-lvl="2">المستوى 2</div>
+                        <div class="lvl-btn" data-lvl="3">المستوى 3</div>
+                        <div class="lvl-btn" data-lvl="4">المستوى 4</div>
                     </div>
 
-                    <div class="action-footer">
-                        <button class="secondary-btn" onclick="toggleInstructions(true)">التعليمات</button>
-                        <button class="primary-btn" id="launchGame">ابدأ اللعب</button>
+                    <div class="controls-row">
+                        <select id="timerSet">
+                            <option value="0">بدون وقت</option>
+                            <option value="10" selected>10 ثوانٍ</option>
+                            <option value="20">20 ثانية</option>
+                        </select>
+                        <button class="sub-btn" onclick="openHelp()">التعليمات</button>
                     </div>
+                    <button id="startBtn" class="main-btn">ابدأ اللعب</button>
                 </div>
             </div>
         </div>
 
         <div id="view-game" class="view">
-            <div class="arena">
-                <div class="top-bar">
-                    <div id="statusX" class="team-tag x-side">
-                        <span id="labelX">X</span>
-                        <span class="pts" id="scoreX">0</span>
+            <div class="arena-layout">
+                <div class="arena-header">
+                    <div id="cardX" class="p-tag x-side">
+                        <span id="txtX">X</span>
+                        <span class="score" id="scX">0</span>
                     </div>
                     
-                    <div class="timer-container">
+                    <div class="timer-orb">
                         <svg viewBox="0 0 100 100">
-                            <circle cx="50" cy="50" r="45" class="t-track"></circle>
-                            <circle cx="50" cy="50" r="45" id="t-prog" class="t-fill"></circle>
+                            <circle cx="50" cy="50" r="45" class="t-bg"></circle>
+                            <circle cx="50" cy="50" r="45" id="t-fill" class="t-val"></circle>
                         </svg>
-                        <span id="t-val">10</span>
+                        <span id="t-num">10</span>
                     </div>
 
-                    <div id="statusO" class="team-tag o-side">
-                        <span id="labelO">O</span>
-                        <span class="pts" id="scoreO">0</span>
+                    <div id="cardO" class="p-tag o-side">
+                        <span id="txtO">O</span>
+                        <span class="score" id="scO">0</span>
                     </div>
                 </div>
 
-                <div class="board-frame">
-                    <div id="grid-81"></div>
+                <div class="board-container">
+                    <div id="board-81"></div>
                 </div>
 
-                <div class="bottom-bar">
-                    <div id="free-msg" class="free-badge hidden">اللعب الحر متاح</div>
-                    <button onclick="location.reload()">الرئيسية</button>
+                <div class="arena-footer">
+                    <div id="free-msg" class="msg-badge hidden">اللعب الحر متاح</div>
+                    <button class="nav-btn" onclick="location.reload()">الرئيسية</button>
                 </div>
             </div>
         </div>
 
-        <div id="modal-instructions" class="overlay">
-            <div class="modal">
-                <h2>التعليمات</h2>
-                <div class="modal-body">
-                    <div class="guide-item">
-                        <h3>منطق الفوز</h3>
-                        <p>تتكون اللعبة من 9 مربعات كبيرة. للفوز بمربع كبير يجب الحصول على 3 علامات متتالية بداخله. الفوز بالمباراة يتطلب السيطرة على 3 مربعات كبيرة متتالية.</p>
+        <div id="modal-help" class="overlay">
+            <div class="pop-modal">
+                <h2>دليل القواعد والمستويات</h2>
+                <div class="pop-body">
+                    <div class="guide-sec">
+                        <h3>منطق اللعبة</h3>
+                        <p>حركتك في المربع الصغير تحدد موقع الخصم في المربع الكبير التالي. سيطر على 3 مربعات كبيرة متتالية للفوز.</p>
                     </div>
-                    <div class="guide-item">
-                        <h3>قانون التوجيه</h3>
-                        <p>موقع المربع الصغير الذي تختاره يحدد المربع الكبير الذي سيلعب فيه الخصم. التخطيط للمكان الذي سترسل إليه خصمك هو مفتاح الفوز.</p>
-                    </div>
-                    <div class="guide-item">
-                        <h3>اللعب الحر</h3>
-                        <p>إذا تم توجيهك لمربع كبير مكتمل أو فاز به أحد اللاعبين، يُفتح لك كامل الجدول كـ "لعب حر" لتختار أي مكان.</p>
+                    <div class="guide-sec">
+                        <h3>تفاصيل المستويات</h3>
+                        <ul>
+                            <li><strong>المستوى 1:</strong> عمليات حسابية مباشرة (جمع، طرح، ضرب، قسمة) بأرقام بين 1-9.</li>
+                            <li><strong>المستوى 2:</strong> إيجاد الرقم الناقص في أحد أطراف المعادلة.</li>
+                            <li><strong>المستوى 3:</strong> إيجاد رقمين يحققان الناتج (يمنع استخدام الرقم 1).</li>
+                            <li><strong>المستوى 4:</strong> موازنة طرفي المعادلة (الميزان الرقمي).</li>
+                        </ul>
                     </div>
                 </div>
-                <button class="close-btn" onclick="toggleInstructions(false)">إغلاق</button>
+                <button class="close-btn" onclick="closeHelp()">إغلاق</button>
             </div>
         </div>
 
         <div id="modal-math" class="overlay">
-            <div class="math-card">
-                <div id="m-lvl" class="m-badge">1</div>
-                <div id="m-eq" class="m-display">-- = --</div>
-                <div id="m-ans" class="m-preview">_</div>
+            <div class="math-modal">
+                <div id="m-lvl-tag" class="m-tag">1</div>
+                <div id="m-eq-text" class="m-eq">-- = --</div>
+                <div id="m-view" class="m-preview">_</div>
                 <div class="numpad">
-                    <button onclick="keyP(1)">1</button><button onclick="keyP(2)">2</button><button onclick="keyP(3)">3</button>
-                    <button onclick="keyP(4)">4</button><button onclick="keyP(5)">5</button><button onclick="keyP(6)">6</button>
-                    <button onclick="keyP(7)">7</button><button onclick="keyP(8)">8</button><button onclick="keyP(9)">9</button>
-                    <button class="c-key" onclick="keyC()">C</button><button onclick="keyP(0)">0</button><button class="d-key" onclick="keyD()">⌫</button>
+                    <button onclick="key(1)">1</button><button onclick="key(2)">2</button><button onclick="key(3)">3</button>
+                    <button onclick="key(4)">4</button><button onclick="key(5)">5</button><button onclick="key(6)">6</button>
+                    <button onclick="key(7)">7</button><button onclick="key(8)">8</button><button onclick="key(9)">9</button>
+                    <button class="c-key" onclick="keyC()">C</button><button onclick="key(0)">0</button><button class="d-key" onclick="keyD()">⌫</button>
                 </div>
             </div>
         </div>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
