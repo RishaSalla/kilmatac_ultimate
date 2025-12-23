@@ -1,12 +1,10 @@
-/* الإعدادات العامة للمنصة */
+/* الألوان المتوهجة والهوية البصرية */
 :root {
-    --bg-color: #f4f7f6;
-    --panel-color: #ffffff;
-    --primary-accent: #2c3e50;
-    --success-green: #27ae60;
-    --error-red: #e74c3c;
-    --text-main: #333;
-    --grid-size: 500px; /* حجم ثابت للوحة اللعب */
+    --neon-cyan: #00f3ff;
+    --neon-purple: #bc13fe;
+    --dark-void: #05060a;
+    --glass-bg: rgba(255, 255, 255, 0.03);
+    --grid-size: 500px; /* ثبات أبعاد اللوحة لمنع الزحف */
 }
 
 * {
@@ -16,106 +14,139 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text-main);
+    background: radial-gradient(circle at center, #101420 0%, var(--dark-void) 100%);
+    color: #fff;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    overflow: hidden; /* منع التمرير لضمان الاحترافية */
+    overflow: hidden; /* منع التمرير لضمان مظهر التطبيقات الاحترافية */
 }
 
-/* نظام التنقل بين الشاشات */
 .screen {
     width: 100%;
     height: 100%;
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 20px;
+    animation: fadeIn 0.5s ease-in;
 }
 
 .hidden { display: none !important; }
 
-/* شاشة الإعدادات */
-.setup-panel {
-    background: var(--panel-color);
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    max-width: 600px;
-    width: 100%;
+/* تأثير الزجاج للشاشة الرئيسية */
+.glass-container {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 243, 255, 0.2);
+    padding: 40px;
+    border-radius: 24px;
+    width: 90%;
+    max-width: 700px;
     text-align: center;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
 }
 
-.input-group {
+.glitch-text {
+    font-size: 2.5rem;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 15px var(--neon-cyan);
+    margin-bottom: 30px;
+}
+
+/* إدخال الأسماء بأسلوب تقني */
+.identity-section {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 10px;
-    margin: 20px 0;
+    gap: 20px;
+    margin-bottom: 30px;
 }
 
-.input-group input {
+.input-box {
+    position: relative;
     flex: 1;
+}
+
+.input-box input {
+    width: 100%;
     padding: 12px;
-    border: 2px solid #ddd;
-    border-radius: 6px;
-    font-size: 1rem;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid var(--neon-purple);
+    color: white;
+    font-size: 1.1rem;
+    outline: none;
 }
 
-.vs { font-weight: bold; color: var(--primary-accent); }
+.input-box label {
+    position: absolute;
+    top: -10px;
+    right: 0;
+    font-size: 0.8rem;
+    color: var(--neon-purple);
+}
 
-/* مساحة القوانين (التصميم الاحترافي) */
-.rules-area {
-    background: #f9f9f9;
-    border: 1px solid #eee;
-    border-radius: 8px;
-    margin: 20px 0;
+/* لوحة التعليمات الشاملة (Scrollable Guide) */
+.manual-section {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
     text-align: right;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.rules-content {
-    max-height: 200px;
+.manual-body {
+    max-height: 180px;
     overflow-y: auto;
-    padding: 15px;
     font-size: 0.9rem;
-    line-height: 1.6;
+    line-height: 1.7;
+    color: #cbd5e0;
 }
 
-/* شبكة اللعب (منع الزحف الصارم) */
-.grid-9x9 {
+.manual-body h4 { color: var(--neon-cyan); margin-top: 10px; }
+
+/* شبكة اللعب النيون الصارمة */
+.neon-grid {
     display: grid;
     grid-template-columns: repeat(9, 1fr);
     grid-template-rows: repeat(9, 1fr);
     width: var(--grid-size);
     height: var(--grid-size);
-    gap: 1px;
-    background-color: #bdc3c7;
-    border: 4px solid var(--primary-accent);
+    gap: 2px;
+    background: rgba(0, 243, 255, 0.1);
+    border: 3px solid var(--neon-cyan);
+    box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
 }
 
 .cell {
-    background: white;
+    background: rgba(255, 255, 255, 0.02);
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    font-weight: bold;
-    font-size: 0.85rem;
     cursor: pointer;
-    user-select: none;
-    transition: background 0.1s;
-    overflow: hidden; /* يمنع خروج النص عن المربع */
-    text-align: center;
+    font-size: 0.8rem;
+    transition: 0.2s;
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.cell:hover { background: #f0f0f0; }
-.cell.active { background: #d1ecf1; box-shadow: inset 0 0 5px rgba(0,0,0,0.2); }
-.cell.correct { background: var(--success-green); color: white; }
+.cell:hover { background: rgba(0, 243, 255, 0.1); }
+.cell.active { 
+    background: rgba(188, 19, 254, 0.2); 
+    border: 1px solid var(--neon-purple);
+    box-shadow: inset 0 0 10px var(--neon-purple);
+}
+.cell.correct { 
+    background: rgba(0, 243, 255, 0.2); 
+    color: var(--neon-cyan);
+    text-shadow: 0 0 5px var(--neon-cyan);
+}
 
-/* لوحة الأرقام المدمجة */
-.num-pad {
+/* لوحة الأرقام الرقمية */
+.digital-numpad {
     display: grid;
     grid-template-columns: repeat(9, 1fr);
     gap: 5px;
@@ -123,46 +154,36 @@ body {
     margin-top: 15px;
 }
 
-.numpad-btn {
-    padding: 15px 0;
-    border: none;
-    background: var(--primary-accent);
-    color: white;
+.digital-numpad button {
+    padding: 12px 0;
+    background: var(--glass-bg);
+    border: 1px solid var(--neon-cyan);
+    color: var(--neon-cyan);
     border-radius: 4px;
     cursor: pointer;
-    font-size: 1.1rem;
-}
-
-.action-buttons {
-    display: flex;
-    gap: 10px;
-    margin-top: 10px;
-    width: var(--grid-size);
-}
-
-#start-game-btn, #finish-btn, #clear-btn {
-    flex: 1;
-    padding: 12px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
     font-weight: bold;
-    text-transform: uppercase;
+    transition: 0.3s;
 }
 
-#start-game-btn { background: var(--success-green); color: white; }
-#clear-btn { background: #95a5a6; color: white; }
-#finish-btn { background: var(--error-red); color: white; }
-
-/* لوحة النتائج العلوية */
-.game-header {
-    width: var(--grid-size);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-    background: var(--primary-accent);
-    color: white;
-    padding: 10px;
-    border-radius: 6px;
+.digital-numpad button:hover {
+    background: var(--neon-cyan);
+    color: var(--dark-void);
+    box-shadow: 0 0 15px var(--neon-cyan);
 }
+
+/* التبويب الجانبي للتعليمات */
+.side-panel {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 300px;
+    height: 100%;
+    background: rgba(5, 6, 10, 0.95);
+    border-left: 2px solid var(--neon-cyan);
+    padding: 20px;
+    z-index: 1000;
+    animation: slideLeft 0.3s ease-out;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideLeft { from { transform: translateX(100%); } to { transform: translateX(0); } }
