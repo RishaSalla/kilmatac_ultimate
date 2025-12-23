@@ -3,27 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>منصة التحدي الرياضي الاحترافية | X-MATH</title>
+    <title>ULTIMATE X-O MATH | التحدي الرياضي الأسمى</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <section id="setup-screen" class="screen">
-        <div class="glass-panel">
-            <h1 class="neon-title">X-MATH CHALLENGE</h1>
+        <div class="glass-panel main-setup">
+            <h1 class="glitch-neon">X-O MATH ULTIMATE</h1>
             
-            <div class="identity-grid">
-                <div class="input-field">
-                    <input type="text" id="team-a" placeholder="اسم الفريق الأول" spellcheck="false">
+            <div class="identity-section">
+                <div class="input-glow-box">
+                    <input type="text" id="team-a" placeholder="اسم الفريق X" spellcheck="false">
                 </div>
-                <div class="vs-glow">VS</div>
-                <div class="input-field">
-                    <input type="text" id="team-b" placeholder="اسم الفريق الثاني" spellcheck="false">
+                <div class="vs-symbol">VS</div>
+                <div class="input-glow-box">
+                    <input type="text" id="team-b" placeholder="اسم الفريق O" spellcheck="false">
                 </div>
             </div>
 
-            <div class="config-row">
-                <label>تحديد مستوى المهمة:</label>
+            <div class="level-selector-box">
+                <label>اختر بروتوكول العمليات:</label>
                 <select id="level-select">
                     <option value="level1">LEVEL 01: الكلاسيكي</option>
                     <option value="level2">LEVEL 02: المجهول الشامل</option>
@@ -32,60 +32,59 @@
                 </select>
             </div>
 
-            <div class="manual-dashboard">
+            <div class="manual-tab">
                 <h3 class="manual-header">الدليل التشغيلي للمنصة</h3>
-                <div class="manual-content">
-                    <div class="manual-section">
-                        <h4>1. ميكانيكا التحدي</h4>
-                        <p>تعتمد المنصة مصفوفة رياضية مكونة من 81 خلية نشطة. الهدف هو فك شفرة جميع الخلايا بنسبة دقة 100%.</p>
-                    </div>
-                    <div class="manual-section">
-                        <h4>2. بروتوكول المستويات</h4>
-                        <p><strong>• الكلاسيكي:</strong> معالجة نواتج العمليات الحسابية المباشرة.</p>
-                        <p><strong>• المجهول:</strong> استنتاج قيمة المتغير (؟) المفقود في قلب المعادلة.</p>
-                        <p><strong>• المزدوج:</strong> نظام الحل المزدوج؛ يتطلب إدخال رقمين متتاليين لتحقيق الناتج المستهدف.</p>
-                        <p><strong>• الميزان:</strong> تحقيق التكافؤ؛ الرقم المدخل يجب أن يجعل قيمة الطرف الأيسر تساوي الطرف الأيمن.</p>
-                    </div>
-                    <div class="manual-section">
-                        <h4>3. قواعد النزاهة والفوز</h4>
-                        <p>يتم إعلان الفوز عند اكتمال 81/81 خلية. النظام يضمن تجربة فريدة في كل جولة عبر خوارزمية سحب عشوائي غير مكرر.</p>
-                    </div>
+                <div class="manual-body">
+                    <section>
+                        <h4>• الهيكل الهندسي (Ultimate X-O):</h4>
+                        <p>تتكون اللعبة من لوحة كبرى تحتوي على 9 مربعات، وكل مربع يحتوي على 9 خلايا صماء. لن تظهر العملية الحسابية إلا عند النقر على الخلية.</p>
+                    </section>
+                    <section>
+                        <h4>• بروتوكول الحل والسيطرة:</h4>
+                        <p>عند النقر، تظهر "حاسبة نيون منبثقة". يجب حل العملية لوضع علامتك (X أو O). السيطرة على 3 خلايا متتالية تمنحك المربع الكبير.</p>
+                    </section>
+                    <section>
+                        <h4>• منطق الفوز والتعادل:</h4>
+                        <p>يفوز الفريق الذي يحقق 3 مربعات كبرى متتالية. في حال التعادل أو امتلاء اللوحة، يتم تفعيل بروتوكول "جولة جديدة" فوراً.</p>
+                    </section>
                 </div>
             </div>
 
-            <button id="launch-btn" class="main-action-btn">تفعيل التحدي</button>
+            <button id="launch-btn" class="power-btn">تفعيل النظام</button>
         </div>
     </section>
 
     <section id="game-screen" class="screen hidden">
-        <div class="game-container">
-            <header class="status-bar">
-                <div class="team-label" id="label-a">TEAM 01</div>
-                <div class="central-info">
-                    <div class="live-score"><span id="score-a">0</span> : <span id="score-b">0</span></div>
+        <div class="game-wrapper">
+            <header class="top-hud">
+                <div class="team-stat x-side" id="name-a">TEAM X</div>
+                <div class="score-board">
+                    <div class="score-nums"><span id="score-a">0</span> : <span id="score-b">0</span></div>
                     <div id="game-timer">00:00</div>
                 </div>
-                <div class="team-label" id="label-b">TEAM 02</div>
+                <div class="team-stat o-side" id="name-b">TEAM O</div>
             </header>
 
-            <main id="game-board" class="precision-grid"></main>
+            <main id="ultimate-board" class="master-grid"></main>
 
-            <footer class="input-controls">
-                <div id="numpad" class="cyber-keys"></div>
-                <div class="utility-btns">
-                    <button id="help-trigger" class="u-btn">التعليمات</button>
-                    <button id="clear-cell" class="u-btn">مسح</button>
-                    <button id="terminate-game" class="u-btn danger">إنهاء</button>
-                </div>
-            </footer>
+            <footer class="bottom-hud">
+                <div class="turn-indicator">دور الفريق: <span id="current-turn-display">-</span></div>
+                <button id="help-btn" class="icon-btn">؟</button>
+                <button id="restart-game" class="icon-btn">↻</button>
+            </header>
         </div>
 
-        <div id="quick-manual" class="side-panel hidden">
-            <div class="panel-header">
-                <h3>دليل المساعدة</h3>
-                <button id="close-manual">×</button>
+        <div id="math-modal" class="modal hidden">
+            <div class="modal-content glass-panel">
+                <div id="modal-op-display" class="math-question">-- × --</div>
+                <div id="modal-input-display" class="math-answer-box">?</div>
+                <div class="modal-numpad">
+                    </div>
+                <div class="modal-actions">
+                    <button id="confirm-ans" class="modal-btn">تأكيد</button>
+                    <button id="close-modal" class="modal-btn cancel">إلغاء</button>
+                </div>
             </div>
-            <div id="manual-text-dynamic" class="panel-body"></div>
         </div>
     </section>
 
