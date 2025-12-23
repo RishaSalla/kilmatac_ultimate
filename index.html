@@ -3,138 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>XO</title>
+    <title>XO - التحدي الرياضي الاستراتيجي</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="dark-mode">
-    <div id="bg-animation"></div>
+    <div id="animated-bg-layer"></div>
 
-    <div id="app-root">
-        <div id="view-setup" class="screen active">
-            <div class="glass-ui">
-                <h1 class="main-logo">XO</h1>
+    <div id="app-wrapper">
+        <div id="setup-view" class="view-screen active">
+            <div class="glass-panel">
+                <h1 class="main-title">XO</h1>
                 
-                <div class="setup-form">
-                    <div class="players-grid">
-                        <div class="input-box">
-                            <label>فريق X</label>
-                            <input type="text" id="nameX" placeholder="اسم اللاعب" autocomplete="off">
+                <div class="setup-container">
+                    <div class="players-row">
+                        <div class="input-group">
+                            <label>قائد فريق X</label>
+                            <input type="text" id="inputX" placeholder="الاسم هنا..." autocomplete="off">
                         </div>
-                        <div class="vs-circle">VS</div>
-                        <div class="input-box">
-                            <label>فريق O</label>
-                            <input type="text" id="nameO" placeholder="اسم اللاعب" autocomplete="off">
+                        <div class="vs-orb">VS</div>
+                        <div class="input-group">
+                            <label>قائد فريق O</label>
+                            <input type="text" id="inputO" placeholder="الاسم هنا..." autocomplete="off">
                         </div>
                     </div>
 
-                    <div class="level-selector">
+                    <div class="levels-master-grid">
                         <div class="lvl-card active" data-lvl="1">المستوى 1</div>
                         <div class="lvl-card" data-lvl="2">المستوى 2</div>
                         <div class="lvl-card" data-lvl="3">المستوى 3</div>
                         <div class="lvl-card" data-lvl="4">المستوى 4</div>
                     </div>
 
-                    <div class="config-row">
-                        <div class="timer-field">
-                            <label>الوقت:</label>
-                            <select id="timerConfig">
+                    <div class="config-footer">
+                        <div class="timer-select">
+                            <label>وقت التفكير:</label>
+                            <select id="timerOption">
                                 <option value="0">بدون وقت</option>
                                 <option value="10" selected>10 ثوانٍ</option>
                                 <option value="20">20 ثانية</option>
                             </select>
                         </div>
-                        <button class="guide-btn" onclick="toggleHelp(true)">التعليمات</button>
+                        <button class="btn-help" onclick="toggleHelpModal(true)">التعليمات والقواعد</button>
                     </div>
                 </div>
 
-                <button id="launchBtn" class="start-btn">ابدأ اللعب</button>
+                <button id="btnStart" class="btn-launch">ابدأ التحدي</button>
             </div>
         </div>
 
-        <div id="view-game" class="screen">
-            <div class="arena-layout">
-                <header class="game-header">
-                    <div id="cardX" class="player-tag x-style">
-                        <span class="symbol">X</span>
-                        <div class="info"><span id="displayNameX">X</span><span class="pts">نقاط: <b id="scoreX">0</b></span></div>
+        <div id="game-view" class="view-screen">
+            <div class="arena-container">
+                <header class="arena-header">
+                    <div id="tagX" class="team-tag x-side">
+                        <span class="icon">X</span>
+                        <div class="details"><span id="nameXDisplay">فريق X</span><span class="score-label">المربعات: <b id="scoreX">0</b></span></div>
                     </div>
 
-                    <div class="timer-hub">
+                    <div class="timer-unit">
                         <svg viewBox="0 0 100 100">
-                            <circle cx="50" cy="50" r="45" class="t-track"></circle>
-                            <circle id="t-prog" cx="50" cy="50" r="45" class="t-fill"></circle>
+                            <circle cx="50" cy="50" r="45" class="t-path"></circle>
+                            <circle id="t-progress" cx="50" cy="50" r="45" class="t-bar"></circle>
                         </svg>
-                        <span id="t-text">10</span>
+                        <span id="t-counter">10</span>
                     </div>
 
-                    <div id="cardO" class="player-tag o-style">
-                        <span class="symbol">O</span>
-                        <div class="info"><span id="displayNameO">O</span><span class="pts">نقاط: <b id="scoreO">0</b></span></div>
+                    <div id="tagO" class="team-tag o-side">
+                        <span class="icon">O</span>
+                        <div class="details"><span id="nameODisplay">فريق O</span><span class="score-label">المربعات: <b id="scoreO">0</b></span></div>
                     </div>
                 </header>
 
-                <main class="game-body">
-                    <div id="ultimate-grid"></div>
+                <main class="arena-main">
+                    <div id="main-board-81"></div>
                 </main>
 
-                <footer class="game-footer">
-                    <div id="free-msg" class="free-banner hidden">وضع اللعب الحر متاح</div>
-                    <button class="exit-btn" onclick="location.reload()">العودة للرئيسية</button>
+                <footer class="arena-footer">
+                    <div id="free-badge" class="free-info hidden">تنبيه: وضع اللعب الحر متاح الآن</div>
+                    <button class="btn-home" onclick="location.reload()">الرئيسية</button>
                 </footer>
             </div>
         </div>
 
-        <div id="modal-help" class="modal-overlay">
-            <div class="help-content">
+        <div id="modal-help" class="modal-layer">
+            <div class="modal-box">
                 <h2>دليل القواعد والمنطق الاستراتيجي</h2>
-                <div class="help-body">
+                <div class="modal-body scrollable">
                     <section>
-                        <h3>1. هيكل اللعبة (XO العملاقة)</h3>
-                        <p>تتكون اللوحة من 9 مربعات كبيرة، وبداخل كل مربع كبير توجد 9 مربعات صغيرة. هدفك هو السيطرة على 3 مربعات كبيرة متتالية للفوز بالمباراة.</p>
-                        
+                        <h3>1. هيكل اللعبة</h3>
+                        <p>تتكون اللوحة من 9 مربعات كبيرة، بداخل كل منها 9 مربعات صغيرة (المجموع 81). للفوز، يجب السيطرة على 3 مربعات كبيرة متتالية.</p>
                     </section>
                     <section>
-                        <h3>2. قانون التوجيه (أين يلعب الخصم؟)</h3>
-                        <p>هذا هو جوهر اللعبة؛ موقع المربع الصغير الذي تضغط عليه هو الذي يحدد لخصمك المربع الكبير الذي يجب أن يلعب فيه تالياً. مثال: إذا ضغطت في الزاوية العلوية اليمنى للمربع الصغير، سيُجبر خصمك على اللعب في المربع الكبير الموجود في الزاوية العلوية اليمنى للوحة العملاقة.</p>
-                        
+                        <h3>2. قانون التوجيه القسري</h3>
+                        <p>مكان ضغطك في المربع الصغير يحدد موقع خصمك في المربع الكبير التالي. التخطيط للمكان الذي ترسل إليه خصمك هو سر الاحتراف.</p>
                     </section>
                     <section>
                         <h3>3. حالات اللعب الحر</h3>
-                        <p>تتحرر من قيود التوجيه وتستطيع اللعب في أي مكان إذا تم توجيهك لمربع ممتلئ تماماً أو مربع فاز به أحد اللاعبين مسبقاً. ستومض اللوحة كاملة حينها باللون الأخضر.</p>
+                        <p>يُفتح لك كامل الجدول إذا تم توجيهك لمربع ممتلئ أو فاز به خصمك مسبقاً.</p>
                     </section>
                     <section>
-                        <h3>4. شرح المستويات الحسابية بالتفصيل</h3>
+                        <h3>4. المستويات الحسابية</h3>
                         <ul>
-                            <li><strong>المستوى 1 (الكلاسيكي):</strong> عمليات حسابية مباشرة (جمع، طرح، ضرب، قسمة) حصراً بين أطراف تتراوح من 1 إلى 9.</li>
-                            <li><strong>المستوى 2 (المجهول):</strong> إيجاد الرقم المجهول لإتمام المعادلة مثل (؟ × 4 = 20).</li>
-                            <li><strong>المستوى 3 (الفراغ المزدوج):</strong> إيجاد رقمين يحققان الناتج المعطى، ويُمنع استخدام الرقم 1 كأحد الحلول.</li>
-                            <li><strong>المستوى 4 (الميزان الرقمي):</strong> موازنة طرفي المعادلة بوضع الرقم الصحيح الذي يجعل الكفتين متساويتين مثل (3 × 4 = 6 × ؟).</li>
+                            <li><strong>المستوى 1:</strong> عمليات مباشرة (1-9).</li>
+                            <li><strong>المستوى 2:</strong> إيجاد الرقم المجهول (؟ + 5 = 10).</li>
+                            <li><strong>المستوى 3:</strong> إيجاد الرقمين للناتج (ممنوع رقم 1).</li>
+                            <li><strong>المستوى 4:</strong> موازنة المعادلة (2 × 6 = 3 × ؟).</li>
                         </ul>
                     </section>
-                    <section>
-                        <h3>5. شروط الفوز</h3>
-                        <p>تتبع اللعبة القواعد التقليدية: الفوز بالسيطرة على 3 مربعات كبيرة متتالية سواء بشكل أفقي، رأسي، أو قطري.</p>
-                    </section>
                 </div>
-                <button class="close-modal" onclick="toggleHelp(false)">فهمت القواعد، عودة</button>
+                <button class="btn-close" onclick="toggleHelpModal(false)">إغلاق الدليل</button>
             </div>
         </div>
 
-        <div id="modal-math" class="modal-overlay">
-            <div class="math-box">
-                <div id="math-hint" class="m-hint">المستوى 1: أوجد الناتج</div>
-                <div id="math-eq" class="m-eq">-- = --</div>
-                <div id="math-preview" class="m-preview">_</div>
+        <div id="modal-math" class="modal-layer">
+            <div class="math-card">
+                <div id="math-type-hint" class="m-hint">المستوى 1: أوجد الناتج</div>
+                <div id="math-question" class="m-eq">-- = --</div>
+                <div id="math-input-view" class="m-ans">_</div>
                 <div class="numpad">
-                    <button onclick="numIn(1)">1</button><button onclick="numIn(2)">2</button><button onclick="numIn(3)">3</button>
-                    <button onclick="numIn(4)">4</button><button onclick="numIn(5)">5</button><button onclick="numIn(6)">6</button>
-                    <button onclick="numIn(7)">7</button><button onclick="numIn(8)">8</button><button onclick="numIn(9)">9</button>
-                    <button class="c-key" onclick="numC()">C</button><button onclick="numIn(0)">0</button><button class="d-key" onclick="numD()">⌫</button>
+                    <button onclick="pressKey(1)">1</button><button onclick="pressKey(2)">2</button><button onclick="pressKey(3)">3</button>
+                    <button onclick="pressKey(4)">4</button><button onclick="pressKey(5)">5</button><button onclick="pressKey(6)">6</button>
+                    <button onclick="pressKey(7)">7</button><button onclick="pressKey(8)">8</button><button onclick="pressKey(9)">9</button>
+                    <button class="c-key" onclick="clearKey()">C</button><button onclick="pressKey(0)">0</button><button class="d-key" onclick="delKey()">⌫</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="modal-end" class="modal-layer">
+            <div class="end-card">
+                <h2 id="end-title">مبروك الفوز!</h2>
+                <p id="end-msg">لقد سيطر فريق X على اللوحة</p>
+                <div class="end-actions">
+                    <button class="btn-replay" id="btnRestart">إعادة الجولة</button>
+                    <button class="btn-home-alt" onclick="location.reload()">الرئيسية</button>
                 </div>
             </div>
         </div>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
