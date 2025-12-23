@@ -1,154 +1,191 @@
 /* =========================================
-   1. المتغيرات والأساسيات (التأسيس الصارم)
+   1. التأسيس والهوية البصرية (Pro Identity)
    ========================================= */
 :root {
-    --bg-dark: #04060b;
-    --bg-panel: rgba(10, 15, 28, 0.98);
-    --accent-x: #ff3344;
-    --accent-o: #0088ff;
-    --accent-guide: #00ff88; 
-    --text-main: #ffffff;
-    --text-dim: #94a3b8;
+    --primary-neon: #00ff88;
+    --accent-x: #ff2d55;
+    --accent-o: #007aff;
+    --bg-deep: #020408;
+    --glass: rgba(15, 20, 35, 0.85);
+    --border: rgba(255, 255, 255, 0.08);
+    --text-high: #ffffff;
+    --text-low: #8e9aaf;
     
-    /* هندسة الأبعاد الثابتة لمنع الاهتزاز */
-    --board-size: clamp(320px, 78vh, 90vw);
-    --grid-gap: 10px;
-    --cell-gap: 5px;
-    /* حساب حجم الخلية ليكون ثابتاً رياضياً */
-    --cell-dim: calc((var(--board-size) - (2 * var(--grid-gap)) - (6 * var(--cell-gap))) / 9);
+    /* هندسة اللوحة الصلبة */
+    --board-dim: clamp(320px, 75vh, 90vw);
+    --cell-gap: 4px;
+    --block-gap: 10px;
+    --cell-size: calc((var(--board-dim) - (2 * var(--block-gap)) - (6 * var(--cell-gap))) / 9);
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
 
 body {
-    background-color: var(--bg-dark);
-    color: var(--text-main);
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-deep);
+    color: var(--text-high);
     height: 100vh; width: 100vw;
-    display: flex; align-items: center; justify-content: center;
     overflow: hidden; direction: rtl;
+    display: flex; align-items: center; justify-content: center;
 }
 
-/* 2. الخلفية الانسيابية */
-#animated-bg-layer {
+/* 2. الخلفية الرقمية المبعثرة (Digital Rain Effect) */
+#digital-background {
+    position: fixed; inset: 0; z-index: -2;
+    background: linear-gradient(rgba(2, 4, 8, 0.9), rgba(2, 4, 8, 0.9)),
+                url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+}
+
+#digital-background::before {
+    content: "10101011001 010110 10101 0110 101010 010110 10101 0110";
+    position: absolute; top: -10%; left: 0; width: 100%; height: 120%;
+    font-size: 1.5rem; color: rgba(0, 255, 136, 0.03);
+    white-space: pre-wrap; word-break: break-all;
+    animation: rain 40s linear infinite;
+    z-index: -1;
+}
+
+@keyframes rain { from { transform: translateY(0); } to { transform: translateY(20%); } }
+
+#glow-overlay {
     position: fixed; inset: 0; z-index: -1;
-    background: radial-gradient(circle at 50% 50%, #0f172a 0%, #04060b 100%);
-    animation: slowFlow 30s ease-in-out infinite alternate;
-}
-@keyframes slowFlow {
-    0% { transform: scale(1); opacity: 0.8; }
-    100% { transform: scale(1.1); opacity: 1; }
+    background: radial-gradient(circle at 50% 50%, rgba(0, 122, 255, 0.05) 0%, transparent 70%);
 }
 
-/* 3. هيكلة الشاشات */
-.view-screen {
+/* 3. واجهة الدخول الاحترافية (Pro Setup UI) */
+.screen-layer {
     position: absolute; inset: 0;
     display: none; align-items: center; justify-content: center;
     padding: 20px;
 }
-.view-screen.active { display: flex; animation: fadeView 0.6s ease; }
-@keyframes fadeView { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+.screen-layer.active { display: flex; animation: slideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
 
-/* 4. واجهة الدخول (XO Minimalist) */
-.glass-panel {
-    background: var(--bg-panel);
+@keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+.pro-card {
+    background: var(--glass);
     backdrop-filter: blur(25px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 40px; padding: 45px;
-    width: min(580px, 95%); text-align: center;
-    box-shadow: 0 50px 100px rgba(0,0,0,0.7);
+    border: 1px solid var(--border);
+    border-radius: 40px; padding: 50px;
+    width: min(620px, 95%);
+    box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+    text-align: center;
 }
 
-.main-title { font-size: 6.5rem; font-weight: 900; letter-spacing: -5px; margin-bottom: 30px; }
-
-.players-row { display: flex; align-items: center; gap: 20px; margin-bottom: 30px; }
-.input-group { flex: 1; text-align: right; }
-.input-group label { display: block; font-size: 0.85rem; color: var(--text-dim); margin-bottom: 10px; }
-.input-group input {
-    width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1);
-    padding: 20px; border-radius: 18px; color: white; text-align: center; font-size: 1.1rem;
+.glitch-logo {
+    font-size: 7rem; font-weight: 900; letter-spacing: -5px;
+    background: linear-gradient(to bottom, #fff, #8e9aaf);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    position: relative; margin-bottom: 5px;
 }
-.vs-orb { background: white; color: black; padding: 12px; border-radius: 50%; font-weight: 900; font-size: 0.7rem; }
 
-.levels-master-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 35px; }
-.lvl-card {
-    background: rgba(255,255,255,0.04); padding: 22px; border-radius: 20px;
-    border: 2px solid transparent; cursor: pointer; transition: 0.3s; font-weight: bold;
+.tagline { color: var(--primary-neon); font-size: 0.9rem; letter-spacing: 3px; margin-bottom: 40px; opacity: 0.8; }
+
+.player-inputs { display: flex; align-items: center; gap: 20px; margin-bottom: 35px; }
+.input-wrapper { flex: 1; text-align: right; }
+.input-wrapper span { display: block; font-size: 0.8rem; color: var(--text-low); margin-bottom: 8px; }
+.input-wrapper input {
+    width: 100%; background: rgba(0,0,0,0.4); border: 1px solid var(--border);
+    padding: 18px; border-radius: 15px; color: #fff; text-align: center; font-size: 1.1rem;
+    transition: 0.3s;
 }
-.lvl-card.active { border-color: var(--accent-o); background: rgba(0, 136, 255, 0.15); }
+.input-wrapper input:focus { border-color: var(--accent-o); box-shadow: 0 0 15px rgba(0, 122, 255, 0.2); }
+.vs-badge { background: #fff; color: #000; padding: 10px; border-radius: 50%; font-weight: 900; font-size: 0.7rem; }
 
-.btn-launch {
-    width: 100%; padding: 24px; border-radius: 22px; border: none;
+.levels-flex { display: flex; justify-content: center; gap: 12px; margin: 20px 0; }
+.lvl-item {
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+    padding: 15px 25px; border-radius: 18px; cursor: pointer; color: var(--text-low);
+    display: flex; flex-direction: column; transition: 0.3s;
+}
+.lvl-item span { font-size: 0.7rem; font-weight: normal; }
+.lvl-item.active { background: rgba(0, 122, 255, 0.15); border-color: var(--accent-o); color: #fff; transform: translateY(-5px); }
+
+/* 4. أزرار التحكم المتطورة (Bottom Controls) */
+.action-zone { display: flex; gap: 15px; margin-top: 40px; }
+.btn-primary-start {
+    flex: 2; padding: 22px; border-radius: 20px; border: none;
     background: var(--accent-o); color: white; font-size: 1.4rem; font-weight: 900;
-    cursor: pointer; box-shadow: 0 20px 40px rgba(0, 136, 255, 0.4);
+    cursor: pointer; box-shadow: 0 15px 35px rgba(0, 122, 255, 0.3); transition: 0.3s;
+}
+.btn-primary-start:hover { transform: scale(1.02); filter: brightness(1.1); }
+
+.btn-help-main {
+    flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+    border-radius: 20px; color: #fff; cursor: pointer; transition: 0.3s;
+}
+.btn-help-main:hover { background: rgba(255,255,255,0.1); }
+
+/* 5. ساحة المباراة (The Arena) */
+.arena-layout { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; align-items: center; }
+
+.top-bar { width: 100%; max-width: 900px; display: flex; justify-content: space-between; align-items: center; padding: 20px; }
+.player-status { display: flex; align-items: center; gap: 15px; padding: 12px 25px; border-radius: 25px; background: var(--glass); }
+.avatar { font-size: 2rem; font-weight: 900; }
+.x-side { border-right: 5px solid var(--accent-x); }
+.o-side { border-left: 5px solid var(--accent-o); }
+
+.timer-ring { position: relative; width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; }
+.timer-ring svg { position: absolute; width: 100%; height: 100%; transform: rotate(-90deg); }
+.timer-ring circle { fill: none; stroke: var(--primary-neon); stroke-width: 4; stroke-dasharray: 201; stroke-dashoffset: 0; transition: 1s linear; }
+#timer-num { font-size: 1.4rem; font-weight: 900; }
+
+/* اللوحة (Structural Grid) */
+#board-holder {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--block-gap);
+    width: var(--board-dim); height: var(--board-dim);
+    padding: var(--block-gap); background: rgba(255,255,255,0.02); border-radius: 30px;
 }
 
-/* 5. ساحة اللعب والشبكة الصلبة */
-.arena-container { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
-.arena-header { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
-
-.team-tag { display: flex; align-items: center; gap: 15px; padding: 15px 30px; border-radius: 25px; background: var(--bg-panel); }
-.x-side { border-right: 6px solid var(--accent-x); }
-.o-side { border-left: 6px solid var(--accent-o); }
-.icon { font-size: 2.5rem; font-weight: 900; }
-
-.timer-unit { position: relative; width: 80px; height: 80px; }
-.timer-unit svg { transform: rotate(-90deg); }
-.t-path { fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 8; }
-.t-bar { fill: none; stroke: var(--accent-guide); stroke-width: 8; stroke-dasharray: 283; transition: 1s linear; }
-#t-counter { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.5rem; }
-
-/* هندسة اللوحة */
-#main-board-81 {
-    display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: var(--grid-gap); padding: var(--grid-gap);
-    width: var(--board-size); height: var(--board-size);
-    background: rgba(255,255,255,0.06); border-radius: 25px; margin: 0 auto;
-}
-
-.local-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--cell-gap); position: relative; border-radius: 12px; }
-
-/* الوميض النبضي الذكي */
-.local-board.smart-glow {
-    box-shadow: 0 0 30px var(--accent-guide);
-    background: rgba(0, 255, 136, 0.1);
-    animation: pulseActive 1.5s infinite;
-}
-@keyframes pulseActive { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+.board-block { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--cell-gap); position: relative; transition: 0.4s; }
+.board-block.active-guide { box-shadow: 0 0 30px var(--primary-neon); background: rgba(0, 255, 136, 0.05); }
 
 .cell {
-    width: var(--cell-dim); height: var(--cell-dim);
-    background: rgba(255,255,255,0.04); border-radius: 8px;
+    width: var(--cell-size); height: var(--cell-size);
+    background: rgba(255,255,255,0.03); border-radius: 8px;
     display: flex; align-items: center; justify-content: center;
-    font-size: calc(var(--cell-dim) * 0.55); font-weight: 900;
-    cursor: pointer; overflow: hidden; /* تثبيت المحتوى */
+    font-size: calc(var(--cell-size) * 0.55); font-weight: 900;
+    cursor: pointer; overflow: hidden; transition: 0.2s;
 }
+.cell:hover { background: rgba(255,255,255,0.08); }
 .cell.X { color: var(--accent-x); text-shadow: 0 0 15px var(--accent-x); }
 .cell.O { color: var(--accent-o); text-shadow: 0 0 15px var(--accent-o); }
 
-/* طبقة الفوز */
-.win-layer {
-    position: absolute; inset: 0; background: var(--bg-dark);
-    display: flex; align-items: center; justify-content: center;
-    font-size: calc(var(--board-size) / 4); font-weight: 900;
-    border-radius: 12px; z-index: 10;
-    animation: popWin 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+/* 6. مركز المساعدة والحاسبة (Modals) */
+.modal-overlay {
+    position: fixed; inset: 0; z-index: 5000;
+    background: rgba(0,0,0,0.95); backdrop-filter: blur(20px);
+    display: none; align-items: center; justify-content: center;
 }
-@keyframes popWin { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-/* 6. النوافذ المنبثقة */
-.modal-layer { position: fixed; inset: 0; z-index: 5000; background: rgba(0,0,0,0.92); backdrop-filter: blur(15px); display: none; align-items: center; justify-content: center; }
-.modal-box, .math-card, .end-card { background: var(--bg-panel); border-radius: 35px; padding: 40px; width: min(580px, 92%); border: 1px solid rgba(255,255,255,0.1); }
+.help-box, .math-card {
+    background: var(--bg-deep); border: 1px solid var(--border);
+    border-radius: 35px; padding: 40px; width: min(550px, 92%);
+}
 
-.scrollable { max-height: 55vh; overflow-y: auto; padding-right: 15px; text-align: right; }
-.scrollable section { margin-bottom: 25px; }
-.scrollable h3 { color: var(--accent-guide); margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
+.help-section { margin-bottom: 25px; text-align: right; }
+.help-section h4 { color: var(--primary-neon); margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
+.help-section p, .help-list li { color: var(--text-low); font-size: 0.95rem; line-height: 1.7; margin-bottom: 8px; }
 
-.m-eq { font-size: 4rem; font-weight: 900; margin: 25px 0; direction: ltr; text-align: center; }
-.m-ans { background: rgba(255,255,255,0.06); padding: 25px; border-radius: 20px; font-size: 3.5rem; text-align: center; color: var(--accent-guide); margin-bottom: 25px; }
+.equation-text { font-size: 4rem; font-weight: 900; text-align: center; margin: 30px 0; direction: ltr; }
 
-.numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-.numpad button { padding: 22px; border-radius: 18px; border: none; background: rgba(255,255,255,0.08); color: white; font-size: 1.6rem; font-weight: bold; cursor: pointer; transition: 0.2s; }
-.numpad button:active { background: var(--accent-o); }
+/* منطقة المدخلات للمستوى الثالث */
+.input-zone { display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 30px; }
+.val-box {
+    width: 80px; height: 80px; background: rgba(255,255,255,0.05);
+    border-radius: 15px; display: flex; align-items: center; justify-content: center;
+    font-size: 3rem; color: var(--primary-neon); border: 2px solid transparent;
+}
+.val-box.active { border-color: var(--primary-neon); box-shadow: 0 0 15px var(--primary-neon); }
+.val-box.hidden { display: none; }
+.op-v { font-size: 2rem; color: var(--text-low); }
+
+.pro-numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.pro-numpad button {
+    padding: 22px; border-radius: 18px; border: none; background: rgba(255,255,255,0.07);
+    color: white; font-size: 1.6rem; font-weight: bold; cursor: pointer; transition: 0.2s;
+}
+.pro-numpad button:active { background: var(--accent-o); transform: scale(0.95); }
+
+.btn-del { background: rgba(255, 45, 85, 0.1) !important; color: var(--accent-x) !important; }
 
 .hidden { display: none; }
