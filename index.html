@@ -3,92 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ULTIMATE X-O MATH PRO</title>
+    <title>ULTIMATE X-O MATH | النسخة النهائية</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <section id="setup-screen" class="screen">
-        <div class="glass-panel entry-card">
-            <h1 class="pro-title">ULTIMATE X-O <span>MATH</span></h1>
+        <div class="glass-panel main-card">
+            <h1 class="main-logo">ULTIMATE <span>MATH</span></h1>
             
-            <div class="identity-layout">
-                <div class="player-card x-theme">
-                    <div class="avatar">X</div>
-                    <input type="text" id="team-a" placeholder="اسم الفريق الأول" spellcheck="false">
+            <div class="level-box">
+                <label>اختر مستوى التحدي:</label>
+                <div class="level-grid">
+                    <button class="level-btn active" data-level="level1">01 الكلاسيكي</button>
+                    <button class="level-btn" data-level="level2">02 المجهول</button>
+                    <button class="level-btn" data-level="level3">03 المزدوج</button>
+                    <button class="level-btn" data-level="level4">04 الميزان</button>
                 </div>
-                
-                <div class="vs-glow-text">VS</div>
-                
-                <div class="player-card o-theme">
-                    <div class="avatar">O</div>
-                    <input type="text" id="team-b" placeholder="اسم الفريق الثاني" spellcheck="false">
+                <div id="level-desc" class="level-info">وصف المستوى: حل العمليات المباشرة لوضع العلامة.</div>
+            </div>
+
+            <div class="players-setup">
+                <div class="p-input x-theme">
+                    <input type="text" id="team-a" placeholder="فريق X" maxlength="12">
+                </div>
+                <div class="vs-text">VS</div>
+                <div class="p-input o-theme">
+                    <input type="text" id="team-b" placeholder="فريق O" maxlength="12">
                 </div>
             </div>
 
-            <div class="action-bar">
-                <button id="open-settings-main" class="secondary-btn">⚙️ الإعدادات والدليل</button>
-                <button id="launch-btn" class="primary-glow-btn">بدء التحدي</button>
+            <div class="main-actions">
+                <button id="open-guide-btn" class="btn-secondary">📖 دليل التعليمات</button>
+                <button id="start-game-btn" class="btn-primary">بدء التحدي</button>
             </div>
         </div>
     </section>
 
     <section id="game-screen" class="screen hidden">
-        <div class="game-hud">
-            <header class="hud-header">
-                <div class="hud-team x-active" id="display-name-a">TEAM X</div>
-                <div class="hud-center">
-                    <div class="score-line"><span id="score-a">0</span> : <span id="score-b">0</span></div>
-                    <small id="timer-display">00:00</small>
+        <div class="game-container">
+            <div class="hud-top">
+                <div class="team-info x-side" id="hud-name-a">--</div>
+                <div class="center-hud">
+                    <div id="score-display">0 : 0</div>
+                    <div id="timer-display">00:00</div>
                 </div>
-                <div class="hud-team" id="display-name-b">TEAM O</div>
-            </header>
+                <div class="team-info o-side" id="hud-name-b">--</div>
+            </div>
 
-            <main id="ultimate-board" class="master-grid"></main>
+            <div id="ultimate-board" class="master-grid"></div>
 
-            <footer class="hud-footer">
-                <div class="indicator-box">
-                    <span class="pulse-dot"></span>
-                    <span id="turn-text">انتظار...</span>
-                </div>
-                <button id="open-settings-game" class="hud-btn">⚙️ الإعدادات</button>
-            </footer >
+            <div class="hud-bottom">
+                <div id="turn-indicator" class="turn-box">دور: <span id="current-player-name">--</span></div>
+                <button id="ingame-guide-btn" class="btn-icon">💡</button>
+                <button id="reset-game-btn" class="btn-icon">↻</button>
+            </div>
         </div>
     </section>
 
-    <div id="settings-modal" class="modal hidden">
-        <div class="modal-content settings-card">
-            <div class="modal-header">
-                <h2>لوحة التحكم والمعلومات</h2>
-                <button class="close-modal">&times;</button>
+    <div id="math-modal" class="modal hidden">
+        <div class="modal-content math-box">
+            <div id="math-question" class="q-display">--</div>
+            
+            <div class="answer-container">
+                <div id="ans-slot-1" class="ans-slot active">?</div>
+                <div id="ans-slot-2" class="ans-slot hidden">?</div>
             </div>
-            <div class="modal-tabs">
-                <div class="tab-body active">
-                    <h3>بروتوكول اللعب (Ultimate Logic):</h3>
-                    <p>• حركتك داخل المربع الصغير تُحدد المربع الكبير الذي سيلعب فيه خصمك.</p>
-                    <p>• المربع المتاح سيومض باللون الأبيض، بينما تُقفل المربعات الأخرى.</p>
-                    <h3>تخصيص المستوى:</h3>
-                    <select id="level-select-modal">
-                        <option value="level1">LEVEL 01: الكلاسيكي</option>
-                        <option value="level2">LEVEL 02: المجهول الشامل</option>
-                        <option value="level3">LEVEL 03: المزدوج الشامل</option>
-                        <option value="level4">LEVEL 04: الميزان الاحترافي</option>
-                    </select>
+
+            <div class="numpad" id="numpad">
                 </div>
+            
+            <div class="modal-footer">
+                <button id="confirm-btn" class="action-btn ok">تأكيد</button>
+                <button id="close-math-btn" class="action-btn cancel">إلغاء</button>
             </div>
-            <button class="save-btn close-modal">حفظ وإغلاق</button>
         </div>
     </div>
 
-    <div id="math-modal" class="modal hidden">
-        <div class="modal-content math-card">
-            <div id="modal-op-display" class="math-q">-- × --</div>
-            <div id="modal-input-display" class="math-a">?</div>
-            <div class="numpad-grid" id="modal-numpad"></div>
-            <div class="modal-footer">
-                <button id="confirm-ans" class="confirm-btn">تأكيد الحل</button>
-                <button id="close-math" class="cancel-btn">تراجع</button>
+    <div id="guide-modal" class="modal hidden">
+        <div class="modal-content guide-box">
+            <div class="guide-header">
+                <h2>دليل تشغيل المهمة</h2>
+                <button class="close-guide">×</button>
             </div>
+            <div class="guide-body" id="guide-content">
+                </div>
         </div>
     </div>
 
