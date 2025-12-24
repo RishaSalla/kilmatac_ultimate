@@ -1,194 +1,246 @@
 /**
- * ULTIMATE X-O MATH ENGINE PRO
- * إصلاح منطق التوجيه + معالجة كافة المستويات (1-4)
+ * ULTIMATE X-O MATH ENGINE - THE FINAL STABLE VERSION
  */
 
 let gameState = {
+    selectedLevel: 'level1',
     levelData: [],
     currentPlayer: 'X',
     bigBoard: Array(9).fill(null),
-    forcedGrid: null, // المربع الذي يجب اللعب فيه
+    forcedGrid: null,
     activeCell: null,
-    scores: { X: 0, O: 0 },
+    inputBuffer: ["", ""], // تخزين الإدخال للخانتين
+    activeSlot: 0,
     timer: null,
     seconds: 0
 };
 
-// 1. إدارة جلب البيانات وتشغيل المستويات
-document.getElementById('launch-btn').addEventListener('click', () => startGame());
+// 1. إعدادات البداية واختيار المستوى
+document.querySelectorAll('.level-btn').forEach(btn => {
+    btn.onclick = () => {
+        document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        gameState.selectedLevel = btn.dataset.level;
+        updateLevelDescription(btn.dataset.level);
+    };
+});
 
-async function startGame() {
-    const level = document.getElementById('level-select-modal').value;
+function updateLevelDescription(lvl) {
+    const desc = {
+        level1: "المستوى الكلاسيكي: حل عمليات مباشرة (أ × ب) لوضع علامتك.",
+        level2: "مستوى المجهول: أوجد الرقمين المفقودين اللذين يحققان المعادلة.",
+        level3: "المستوى المزدوج: أوجد رقمين ناتجهما هو الرقم المعطى.",
+        level4: "المستوى الاحترافي: عمليات مركبة وتحديات الميزان بدقة عالية."
+    };
+    document.getElementById('level-desc').textContent = desc[lvl];
+}
+
+// 2. تشغيل اللعبة وجلب البيانات
+document.getElementById('start-game-btn').onclick = async () => {
     try {
-        const response = await fetch(`data/${level}.json`);
-        if (!response.ok) throw new Error();
+        const response = await fetch(`data/${gameState.selectedLevel}.json`);
         const data = await response.json();
         
-        // معالجة البيانات بناءً على هيكلية ملفاتك المختلفة
-        gameState.levelData = extractPool(data.pool, level);
+        // فرز البيانات بناءً على هيكلية الملفات لديك
+        gameState.levelData = processPool(data.pool, gameState.selectedLevel);
         
-        setupUI();
-        initUltimateBoard();
+        setupGameUI();
+        initBoard();
         startTimer();
         
         document.getElementById('setup-screen').classList.add('hidden');
         document.getElementById('game-screen').classList.remove('hidden');
     } catch (e) {
-        alert("خطأ: تأكد من اختيار المستوى من الإعدادات ووجود ملفات JSON في مجلد data");
+        alert("فشل تحميل مستوى " + gameState.selectedLevel + ". تأكد من وجود ملف الـ JSON في مجلد data.");
     }
+};
+
+function processPool(pool, lvl) {
+    if (lvl === 'level1') return [...pool.ones_group.slice(0, 10), ...pool.core_challenges].sort(() => Math.random() - 0.5);
+    if (lvl === 'level2') return [...pool.addition_unknowns, ...pool.subtraction_unknowns].sort(() => Math.random() - 0.5);
+    if (lvl === 'level3') return [...pool.strict_challenges_2_to_9].sort(() => Math.random() - 0.5);
+    if (lvl === 'level4') return [...pool.strict_challenges_90_percent, ...pool.ones_group_10_percent].sort(() => Math.random() - 0.5);
+    return [];
 }
 
-// استخراج الأسئلة بدقة من ملفاتك
-function extractPool(pool, level) {
-    let items = [];
-    if (level === 'level1') items = [...pool.ones_group.slice(0,8), ...pool.core_challenges];
-    else if (level === 'level2') items = [...pool.ones_group.slice(0,8), ...pool.addition_unknowns, ...pool.subtraction_unknowns];
-    else if (level === 'level3') items = [...pool.only_ones_group.slice(0,8), ...pool.strict_challenges_2_to_9];
-    else if (level === 'level4') items = [...pool.ones_group_10_percent.slice(0,8), ...pool.strict_challenges_90_percent];
-    
-    return items.sort(() => Math.random() - 0.5);
-}
-
-// 2. بناء اللوحة ومنطق "الإجبار"
-function initUltimateBoard() {
+// 3. بناء اللوحة ومنطق الإجبار
+function initBoard() {
     const board = document.getElementById('ultimate-board');
     board.innerHTML = '';
-    
     for (let i = 0; i < 9; i++) {
         const subGrid = document.createElement('div');
         subGrid.className = 'sub-grid';
         subGrid.id = `grid-${i}`;
-        
         for (let j = 0; j < 9; j++) {
             const cell = document.createElement('div');
             cell.className = 'cell';
-            cell.onclick = () => handleCellClick(i, j, cell);
+            cell.onclick = () => onCellClick(i, j, cell);
             subGrid.appendChild(cell);
         }
         board.appendChild(subGrid);
     }
-    updateForcedGridUI();
+    highlightForcedGrid();
 }
 
-// 3. منطق النقر والتحقق من التوجيه
-function handleCellClick(gridIdx, cellIdx, cell) {
-    // شرط التوجيه: يجب اللعب في المربع المحدد إلا إذا كان حراً (null)
-    if (gameState.forcedGrid !== null && gameState.forcedGrid !== gridIdx) {
-        alert("عذراً! يجب عليك اللعب في المربع النشط فقط.");
+function onCellClick(gIdx, cIdx, cell) {
+    if (gameState.forcedGrid !== null && gameState.forcedGrid !== gIdx) {
+        alert("إجبار! يجب اللعب في المربع المضيء.");
         return;
     }
-    if (gameState.bigBoard[gridIdx] || cell.textContent !== '') return;
-
-    openMathModal(gridIdx, cellIdx, cell);
+    if (gameState.bigBoard[gIdx] || cell.textContent !== '') return;
+    
+    showMathModal(gIdx, cIdx, cell);
 }
 
-function openMathModal(gridIdx, cellIdx, cell) {
-    const level = document.getElementById('level-select-modal').value;
-    const op = gameState.levelData[(gridIdx * 9 + cellIdx) % gameState.levelData.length];
-    gameState.activeCell = { gridIdx, cellIdx, cell, op };
+// 4. الحاسبة ونظام الخانات (Slots)
+function showMathModal(gIdx, cIdx, cell) {
+    const op = gameState.levelData[(gIdx * 9 + cIdx) % gameState.levelData.length];
+    gameState.activeCell = { gIdx, cIdx, cell, op };
+    gameState.inputBuffer = ["", ""];
+    gameState.activeSlot = 0;
 
-    // تحويل الرموز للعرض
-    let question = (level === 'level4') ? op.q : (op.target !== undefined ? `${op.target} = ? ${op.op} ...` : op.q);
-    if (level === 'level3') question = `الناتج: ${op.target} (عملية ${op.op === '*' ? '×' : op.op})`;
+    // تجهيز السؤال والواجهة
+    const qEl = document.getElementById('math-question');
+    const slot2 = document.getElementById('ans-slot-2');
+    slot2.classList.add('hidden');
     
-    document.getElementById('modal-op-display').textContent = question.replace(/\*/g, '×').replace(/\//g, '÷');
-    document.getElementById('modal-input-display').textContent = '';
-    
-    // توليد النمباد
-    const pad = document.getElementById('modal-numpad');
-    pad.innerHTML = '';
-    [1,2,3,4,5,6,7,8,9,0].forEach(n => {
-        const b = document.createElement('button');
-        b.textContent = n;
-        b.onclick = () => document.getElementById('modal-input-display').textContent += n;
-        pad.appendChild(b);
-    });
-    
+    if (gameState.selectedLevel === 'level2') {
+        qEl.textContent = `? ${op.op} ? = ${op.target}`;
+        slot2.classList.remove('hidden');
+    } else if (gameState.selectedLevel === 'level3') {
+        qEl.textContent = `أوجد رقمين ناتجهما: ${op.target}`;
+        slot2.classList.remove('hidden');
+    } else {
+        qEl.textContent = op.q.replace('*', '×').replace('/', '÷');
+    }
+
+    updateSlotsUI();
+    buildNumpad();
     document.getElementById('math-modal').classList.remove('hidden');
 }
 
-// 4. التحقق من الإجابة وتحديث المربع القادم
-document.getElementById('confirm-ans').onclick = () => {
-    const val = document.getElementById('modal-input-display').textContent;
-    const { op, cell, gridIdx, cellIdx } = gameState.activeCell;
-    const level = document.getElementById('level-select-modal').value;
+function buildNumpad() {
+    const pad = document.getElementById('numpad');
+    pad.innerHTML = '';
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 0].forEach(n => {
+        const b = document.createElement('button');
+        b.textContent = n;
+        b.onclick = () => {
+            gameState.inputBuffer[gameState.activeSlot] += n;
+            updateSlotsUI();
+        };
+        pad.appendChild(b);
+    });
     
-    let isCorrect = false;
-    if (level === 'level3') {
-        // منطق المزدوج
-        const nums = val.split('').map(Number);
-        isCorrect = op.pairs.some(p => (p[0] == nums[0] && p[1] == nums[1]) || (p[0] == nums[1] && p[1] == nums[0]));
+    // زر المسح (C)
+    const clearBtn = document.createElement('button');
+    clearBtn.textContent = 'C';
+    clearBtn.className = 'clear-btn';
+    clearBtn.onclick = () => {
+        gameState.inputBuffer = ["", ""];
+        gameState.activeSlot = 0;
+        updateSlotsUI();
+    };
+    pad.appendChild(clearBtn);
+}
+
+function updateSlotsUI() {
+    document.getElementById('ans-slot-1').textContent = gameState.inputBuffer[0] || '?';
+    document.getElementById('ans-slot-2').textContent = gameState.inputBuffer[1] || '?';
+    
+    document.getElementById('ans-slot-1').classList.toggle('active', gameState.activeSlot === 0);
+    document.getElementById('ans-slot-2').classList.toggle('active', gameState.activeSlot === 1);
+
+    // التبديل التلقائي للخانات في المستويات المزدوجة
+    if (gameState.inputBuffer[0].length > 0 && (gameState.selectedLevel === 'level2' || gameState.selectedLevel === 'level3')) {
+        if (gameState.activeSlot === 0) gameState.activeSlot = 1;
+        document.getElementById('ans-slot-2').classList.add('active');
+        document.getElementById('ans-slot-1').classList.remove('active');
+    }
+}
+
+// 5. التحقق من الإجابة (Logic Verification)
+document.getElementById('confirm-btn').onclick = () => {
+    const { op, cell, gIdx, cIdx } = gameState.activeCell;
+    const val1 = parseInt(gameState.inputBuffer[0]);
+    const val2 = parseInt(gameState.inputBuffer[1]);
+    let correct = false;
+
+    if (gameState.selectedLevel === 'level2') {
+        // التحقق من المعادلة: هل المدخلين يحققان الهدف؟
+        correct = (op.op === '+' ? val1 + val2 : val1 - val2) === op.target;
+    } else if (gameState.selectedLevel === 'level3') {
+        // التحقق من مصفوفة الـ pairs
+        correct = op.pairs.some(p => (p[0] === val1 && p[1] === val2) || (p[0] === val2 && p[1] === val1));
     } else {
-        isCorrect = parseInt(val) === (op.a || op.target);
+        correct = val1 === (op.a || op.target);
     }
 
-    if (isCorrect) {
+    if (correct) {
         cell.textContent = gameState.currentPlayer;
         cell.classList.add(gameState.currentPlayer === 'X' ? 'x-mark' : 'o-mark');
-        
-        checkSubGridWin(gridIdx);
-        
-        // أهم سطر: تحديد المربع القادم بناءً على مكان اللعب الحالي
-        gameState.forcedGrid = (gameState.bigBoard[cellIdx] === null) ? cellIdx : null;
-        
-        switchTurn();
+        checkWin(gIdx);
+        gameState.forcedGrid = (gameState.bigBoard[cIdx] === null) ? cIdx : null;
+        switchPlayer();
         document.getElementById('math-modal').classList.add('hidden');
     } else {
-        alert("خطأ! ركز في العملية.");
-        document.getElementById('modal-input-display').textContent = '';
+        alert("إجابة خاطئة! حاول مرة أخرى.");
+        gameState.inputBuffer = ["", ""];
+        gameState.activeSlot = 0;
+        updateSlotsUI();
     }
 };
 
-function switchTurn() {
+function switchPlayer() {
     gameState.currentPlayer = gameState.currentPlayer === 'X' ? 'O' : 'X';
-    document.getElementById('turn-text').textContent = `دور: ${gameState.currentPlayer}`;
-    updateForcedGridUI();
+    document.getElementById('current-player-name').textContent = 
+        gameState.currentPlayer === 'X' ? document.getElementById('team-a').value || 'X' : document.getElementById('team-b').value || 'O';
+    highlightForcedGrid();
 }
 
-function updateForcedGridUI() {
+function highlightForcedGrid() {
     document.querySelectorAll('.sub-grid').forEach((g, i) => {
         g.classList.remove('active-target');
-        if (gameState.forcedGrid === i) g.classList.add('active-target');
-        if (gameState.forcedGrid === null && !gameState.bigBoard[i]) g.classList.add('active-target');
+        if (gameState.forcedGrid === i || (gameState.forcedGrid === null && !gameState.bigBoard[i])) {
+            g.classList.add('active-target');
+        }
     });
 }
 
-function checkSubGridWin(idx) {
-    const grid = document.getElementById(`grid-${idx}`);
-    const cells = Array.from(grid.children).map(c => c.textContent);
-    if (checkLine(cells)) {
-        gameState.bigBoard[idx] = gameState.currentPlayer;
-        grid.classList.add(gameState.currentPlayer === 'X' ? 'won-x' : 'won-o');
-        grid.setAttribute('data-winner', gameState.currentPlayer);
-        if (checkLine(gameState.bigBoard)) {
-            alert(`نهاية اللعبة! فوز تاريخي لفريق ${gameState.currentPlayer}`);
+// 6. التحقق من الفوز (Winning Logic)
+function checkWin(gIdx) {
+    const subGridCells = Array.from(document.querySelectorAll(`#grid-${gIdx} .cell`)).map(c => c.textContent);
+    if (isWinningLine(subGridCells)) {
+        gameState.bigBoard[gIdx] = gameState.currentPlayer;
+        const g = document.getElementById(`grid-${gIdx}`);
+        g.classList.add(gameState.currentPlayer === 'X' ? 'won-x' : 'won-o');
+        if (isWinningLine(gameState.bigBoard)) {
+            alert("مبروك! فاز الفريق " + gameState.currentPlayer);
             location.reload();
         }
     }
 }
 
-function checkLine(b) {
-    const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-    return wins.some(l => b[l[0]] && b[l[0]] === b[l[1]] && b[l[0]] === b[l[2]]);
+function isWinningLine(b) {
+    const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    return lines.some(l => b[l[0]] && b[l[0]] === b[l[1]] && b[l[0]] === b[l[2]]);
 }
 
-// إدارة النوافذ المنبثقة
-document.querySelectorAll('.close-modal, #close-math').forEach(b => {
-    b.onclick = () => document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden'));
-});
-document.getElementById('open-settings-main').onclick = () => document.getElementById('settings-modal').classList.remove('hidden');
-document.getElementById('open-settings-game').onclick = () => document.getElementById('settings-modal').classList.remove('hidden');
-
-function setupUI() {
-    document.getElementById('display-name-a').textContent = document.getElementById('team-a').value || "TEAM X";
-    document.getElementById('display-name-b').textContent = document.getElementById('team-b').value || "TEAM O";
-}
-
+// التوقيت والواجهة
 function startTimer() {
     gameState.timer = setInterval(() => {
         gameState.seconds++;
-        let m = Math.floor(gameState.seconds / 60).toString().padStart(2, '0');
-        let s = (gameState.seconds % 60).toString().padStart(2, '0');
+        const m = Math.floor(gameState.seconds/60).toString().padStart(2,'0');
+        const s = (gameState.seconds%60).toString().padStart(2,'0');
         document.getElementById('timer-display').textContent = `${m}:${s}`;
     }, 1000);
 }
+
+function setupGameUI() {
+    document.getElementById('hud-name-a').textContent = document.getElementById('team-a').value || 'TEAM X';
+    document.getElementById('hud-name-b').textContent = document.getElementById('team-b').value || 'TEAM O';
+    document.getElementById('current-player-name').textContent = document.getElementById('team-a').value || 'X';
+}
+
+// إغلاق المودال
+document.getElementById('close-math-btn').onclick = () => document.getElementById('math-modal').classList.add('hidden');
